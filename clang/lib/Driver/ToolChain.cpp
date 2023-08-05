@@ -569,7 +569,7 @@ static StringRef getArchNameForCompilerRTLib(const ToolChain &TC,
 }
 
 StringRef ToolChain::getOSLibName() const {
-  if (Triple.isOSDarwin())
+  if (TripleUtils::isOSDarwin(Triple))
     return "darwin";
 
   switch (Triple.getOS()) {
@@ -829,7 +829,7 @@ std::string ToolChain::GetLinkerPath(bool *LinkerIsLLD) const {
       return std::string(UseLinker);
   } else {
     llvm::SmallString<8> LinkerName;
-    if (Triple.isOSDarwin())
+    if (TripleUtils::isOSDarwin(Triple))
       LinkerName.append("ld64.");
     else
       LinkerName.append("ld.");
@@ -851,7 +851,7 @@ std::string ToolChain::GetLinkerPath(bool *LinkerIsLLD) const {
 
 std::string ToolChain::GetStaticLibToolPath() const {
   // TODO: Add support for static lib archiving on Windows
-  if (Triple.isOSDarwin())
+  if (TripleUtils::isOSDarwin(Triple))
     return GetProgramPath("libtool");
   return GetProgramPath("llvm-ar");
 }

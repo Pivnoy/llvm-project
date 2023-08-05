@@ -312,7 +312,7 @@ const uint32_t *AArch64RegisterInfo::getCustomEHPadPreservedMask(
 }
 
 const uint32_t *AArch64RegisterInfo::getTLSCallPreservedMask() const {
-  if (TT.isOSDarwin())
+  if (TripleUtils::isOSDarwin(TT))
     return CSR_Darwin_AArch64_TLS_RegMask;
 
   assert(TT.isOSBinFormatELF() && "Invalid target");
@@ -407,7 +407,7 @@ AArch64RegisterInfo::getStrictlyReservedRegs(const MachineFunction &MF) const {
   markSuperRegs(Reserved, AArch64::WSP);
   markSuperRegs(Reserved, AArch64::WZR);
 
-  if (TFI->hasFP(MF) || TT.isOSDarwin())
+  if (TFI->hasFP(MF) || TripleUtils::isOSDarwin(TT))
     markSuperRegs(Reserved, AArch64::W29);
 
   if (MF.getSubtarget<AArch64Subtarget>().isWindowsArm64EC()) {
@@ -943,7 +943,7 @@ unsigned AArch64RegisterInfo::getRegPressureLimit(const TargetRegisterClass *RC,
   case AArch64::GPR32commonRegClassID:
   case AArch64::GPR64commonRegClassID:
     return 32 - 1                                   // XZR/SP
-              - (TFI->hasFP(MF) || TT.isOSDarwin()) // FP
+              - (TFI->hasFP(MF) || TripleUtils::isOSDarwin(TT)) // FP
               - MF.getSubtarget<AArch64Subtarget>().getNumXRegisterReserved()
               - hasBasePointer(MF);  // X19
   case AArch64::FPR8RegClassID:

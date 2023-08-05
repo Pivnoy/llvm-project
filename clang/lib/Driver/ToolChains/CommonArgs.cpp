@@ -63,6 +63,7 @@
 #include "llvm/Support/YAMLParser.h"
 #include "llvm/TargetParser/Host.h"
 #include "llvm/TargetParser/TargetParser.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <optional>
 
 using namespace clang::driver;
@@ -1526,20 +1527,20 @@ tools::ParsePICArgs(const ToolChain &ToolChain, const ArgList &Args) {
   // Introduce a Darwin and PS4/PS5-specific hack. If the default is PIC, but
   // the PIC level would've been set to level 1, force it back to level 2 PIC
   // instead.
-  if (PIC && (Triple.isOSDarwin() || EffectiveTriple.isPS()))
+  if (PIC && (llvm::TripleUtils::isOSDarwin(Triple)|| EffectiveTriple.isPS()))
     IsPICLevelTwo |= ToolChain.isPICDefault();
 
   // This kernel flags are a trump-card: they will disable PIC/PIE
   // generation, independent of the argument order.
   if (KernelOrKext &&
-      ((!EffectiveTriple.isiOS() || EffectiveTriple.isOSVersionLT(6)) &&
+      ((!llvm::TripleUtils::isiOS(EffectiveTriple) || llvm::TripleUtils::isOSVersionLT(EffectiveTriple, 6)) &&
        !EffectiveTriple.isWatchOS() && !EffectiveTriple.isDriverKit()))
     PIC = PIE = false;
 
   if (Arg *A = Args.getLastArg(options::OPT_mdynamic_no_pic)) {
     // This is a very special mode. It trumps the other modes, almost no one
     // uses it, and it isn't even valid on any OS but Darwin.
-    if (!Triple.isOSDarwin())
+    if (!TripleUtils::isOSDarwin(Triple))
       ToolChain.getDriver().Diag(diag::err_drv_unsupported_opt_for_target)
           << A->getSpelling() << Triple.str();
 

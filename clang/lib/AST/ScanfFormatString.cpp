@@ -186,15 +186,15 @@ static ScanfSpecifierResult ParseScanfSpecifier(FormatStringHandler &H,
     // Apple extensions
       // Apple-specific
     case 'D':
-      if (Target.getTriple().isOSDarwin())
+      if (llvm::TripleUtils::isOSDarwin(Target.getTriple()))
         k = ConversionSpecifier::DArg;
       break;
     case 'O':
-      if (Target.getTriple().isOSDarwin())
+      if (llvm::TripleUtils::isOSDarwin(Target.getTriple()))
         k = ConversionSpecifier::OArg;
       break;
     case 'U':
-      if (Target.getTriple().isOSDarwin())
+      if (llvm::TripleUtils::isOSDarwin(Target.getTriple()))
         k = ConversionSpecifier::UArg;
       break;
   }

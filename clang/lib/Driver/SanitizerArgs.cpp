@@ -877,7 +877,7 @@ SanitizerArgs::SanitizerArgs(const ToolChain &TC,
   SharedRuntime =
       Args.hasFlag(options::OPT_shared_libsan, options::OPT_static_libsan,
                    TC.getTriple().isAndroid() || TC.getTriple().isOSFuchsia() ||
-                       TC.getTriple().isOSDarwin());
+                      llvm::TripleUtils::isOSDarwin(TC.getTriple()));
 
   ImplicitCfiRuntime = TC.getTriple().isAndroid();
 
@@ -949,7 +949,7 @@ SanitizerArgs::SanitizerArgs(const ToolChain &TC,
       AsanInvalidPointerSub = true;
     }
 
-    if (TC.getTriple().isOSDarwin() &&
+    if (llvm::TripleUtils::isOSDarwin(TC.getTriple()) &&
         (Args.hasArg(options::OPT_mkernel) ||
          Args.hasArg(options::OPT_fapple_kext))) {
       AsanDtorKind = llvm::AsanDtorKind::None;

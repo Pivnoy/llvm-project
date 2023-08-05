@@ -70,6 +70,7 @@
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "llvm/Transforms/Instrumentation.h"
 #include "llvm/Transforms/Instrumentation/AddressSanitizerCommon.h"
 #include "llvm/Transforms/Instrumentation/AddressSanitizerOptions.h"
@@ -476,9 +477,9 @@ struct ShadowMapping {
 static ShadowMapping getShadowMapping(const Triple &TargetTriple, int LongSize,
                                       bool IsKasan) {
   bool IsAndroid = TargetTriple.isAndroid();
-  bool IsIOS = TargetTriple.isiOS() || TargetTriple.isWatchOS() ||
-               TargetTriple.isDriverKit();
-  bool IsMacOS = TargetTriple.isMacOSX();
+  bool IsIOS = TripleUtils::isiOS(TargetTriple) || TripleUtils::isWatchOS(TargetTriple) ||
+               TripleUtils::isDriverKit(TargetTriple);
+  bool IsMacOS = TripleUtils::isMacOSX(TargetTriple);
   bool IsFreeBSD = TargetTriple.isOSFreeBSD();
   bool IsNetBSD = TargetTriple.isOSNetBSD();
   bool IsPS = TargetTriple.isPS();
@@ -593,7 +594,7 @@ static ShadowMapping getShadowMapping(const Triple &TargetTriple, int LongSize,
                            !(Mapping.Offset & (Mapping.Offset - 1)) &&
                            Mapping.Offset != kDynamicShadowSentinel;
   bool IsAndroidWithIfuncSupport =
-      IsAndroid && !TargetTriple.isAndroidVersionLT(21);
+      IsAndroid && !TripleUtils::isAndroidVersionLT(TargetTriple, 21);
   Mapping.InGlobal = ClWithIfunc && IsAndroidWithIfuncSupport && IsArmOrThumb;
 
   return Mapping;
@@ -2020,13 +2021,13 @@ bool ModuleAddressSanitizer::ShouldUseMachOGlobalsSection() const {
   if (!TargetTriple.isOSBinFormatMachO())
     return false;
 
-  if (TargetTriple.isMacOSX() && !TargetTriple.isMacOSXVersionLT(10, 11))
+  if (TripleUtils::isMacOSX(TargetTriple) && !TripleUtils::isMacOSXVersionLT(TargetTriple, 10, 11))
     return true;
-  if (TargetTriple.isiOS() /* or tvOS */ && !TargetTriple.isOSVersionLT(9))
+  if (TripleUtils::isiOS(TargetTriple) /* or tvOS */ && !TripleUtils::isOSVersionLT(TargetTriple, 9))
     return true;
-  if (TargetTriple.isWatchOS() && !TargetTriple.isOSVersionLT(2))
+  if (TripleUtils::isWatchOS(TargetTriple) && !TripleUtils::isOSVersionLT(TargetTriple, 2))
     return true;
-  if (TargetTriple.isDriverKit())
+  if (TripleUtils::isDriverKit(TargetTriple))
     return true;
 
   return false;

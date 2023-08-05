@@ -105,7 +105,7 @@ PlatformNetBSD::PlatformNetBSD(bool is_host)
   if (is_host) {
     ArchSpec hostArch = HostInfo::GetArchitecture(HostInfo::eArchKindDefault);
     m_supported_architectures.push_back(hostArch);
-    if (hostArch.GetTriple().isArch64Bit()) {
+    if (llvm::TripleUtils::isArch64Bit(hostArch.GetTriple())) {
       m_supported_architectures.push_back(
           HostInfo::GetArchitecture(HostInfo::eArchKind32));
     }
@@ -265,7 +265,7 @@ CompilerType PlatformNetBSD::GetSiginfoType(const llvm::Triple &triple) {
                             lldb::eAccessPublic, 0);
 
   // the structure is padded on 64-bit arches to fix alignment
-  if (triple.isArch64Bit())
+  if (llvm::TripleUtils::isArch64Bit(triple))
     ast->AddFieldToRecordType(ksiginfo_type, "__pad0", int_type,
                               lldb::eAccessPublic, 0);
 

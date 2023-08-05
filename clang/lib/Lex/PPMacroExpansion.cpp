@@ -1437,7 +1437,7 @@ static bool isTargetOS(const TargetInfo &TI, const IdentifierInfo *II) {
   llvm::Triple OS(OSName);
   if (OS.getOS() == llvm::Triple::Darwin) {
     // Darwin matches macos, ios, etc.
-    return TI.getTriple().isOSDarwin();
+    return llvm::TripleUtils::isOSDarwin(TI.getTriple());
   }
   return TI.getTriple().getOS() == OS.getOS();
 }
@@ -1457,7 +1457,7 @@ static bool isTargetEnvironment(const TargetInfo &TI,
 
 /// Implements the __is_target_variant_os builtin macro.
 static bool isTargetVariantOS(const TargetInfo &TI, const IdentifierInfo *II) {
-  if (TI.getTriple().isOSDarwin()) {
+  if (llvm::TripleUtils::isOSDarwin(TI.getTriple())) {
     const llvm::Triple *VariantTriple = TI.getDarwinTargetVariantTriple();
     if (!VariantTriple)
       return false;
@@ -1477,7 +1477,7 @@ static bool isTargetVariantOS(const TargetInfo &TI, const IdentifierInfo *II) {
 /// Implements the __is_target_variant_environment builtin macro.
 static bool isTargetVariantEnvironment(const TargetInfo &TI,
                                 const IdentifierInfo *II) {
-  if (TI.getTriple().isOSDarwin()) {
+  if (llvm::TripleUtils::isOSDarwin(TI.getTriple())) {
     const llvm::Triple *VariantTriple = TI.getDarwinTargetVariantTriple();
     if (!VariantTriple)
       return false;

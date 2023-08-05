@@ -15,6 +15,7 @@
 #include "llvm/MC/MCStreamer.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 using namespace llvm;
 
 enum AsmWriterFlavorTy {
@@ -64,7 +65,7 @@ X86MCAsmInfoDarwin::X86MCAsmInfoDarwin(const Triple &T) {
   // old assembler lacks some directives
   // FIXME: this should really be a check on the assembler characteristics
   // rather than OS version
-  if (T.isMacOSX() && T.isMacOSXVersionLT(10, 6))
+  if (TripleUtils::isMacOSX(T) && TripleUtils::isMacOSXVersionLT(T, 10, 6))
     HasWeakDefCanBeHiddenDirective = false;
 
   // Assume ld64 is new enough that the abs-ified FDE relocs may be used

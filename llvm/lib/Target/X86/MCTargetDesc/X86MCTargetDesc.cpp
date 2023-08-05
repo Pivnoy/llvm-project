@@ -30,6 +30,7 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/TargetParser/Host.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 using namespace llvm;
 
@@ -48,7 +49,7 @@ std::string X86_MC::ParseX86Triple(const Triple &TT) {
   std::string FS;
   // SSE2 should default to enabled in 64-bit mode, but can be turned off
   // explicitly.
-  if (TT.isArch64Bit())
+  if (TripleUtils::isArch64Bit(TT))
     FS = "+64bit-mode,-32bit-mode,-16bit-mode,+sse2";
   else if (TT.getEnvironment() != Triple::CODE16)
     FS = "-64bit-mode,+32bit-mode,-16bit-mode";
@@ -62,7 +63,7 @@ unsigned X86_MC::getDwarfRegFlavour(const Triple &TT, bool isEH) {
   if (TT.getArch() == Triple::x86_64)
     return DWARFFlavour::X86_64;
 
-  if (TT.isOSDarwin())
+  if (TripleUtils::isOSDarwin(TT))
     return isEH ? DWARFFlavour::X86_32_DarwinEH : DWARFFlavour::X86_32_Generic;
   if (TT.isOSCygMing())
     // Unsupported by now, just quick fallback

@@ -451,9 +451,9 @@ bool AArch64Subtarget::supportsAddressTopByteIgnored() const {
   if (!UseAddressTopByteIgnored)
     return false;
 
-  if (TargetTriple.isDriverKit())
+  if (TripleUtils::isDriverKit(TargetTriple))
     return true;
-  if (TargetTriple.isiOS()) {
+  if (TripleUtils::isiOS(TargetTriple)) {
     return TargetTriple.getiOSVersion() >= VersionTuple(8);
   }
 

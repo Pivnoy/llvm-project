@@ -1078,7 +1078,7 @@ bool ObjCDeallocChecker::isNibLoadedIvarWithoutRetain(
   const llvm::Triple &Target =
       IvarDecl->getASTContext().getTargetInfo().getTriple();
 
-  if (!Target.isMacOSX())
+  if (!llvm::TripleUtils::isMacOSX(Target))
     return false;
 
   if (PropImpl->getPropertyDecl()->getSetterMethodDecl())

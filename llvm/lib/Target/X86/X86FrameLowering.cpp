@@ -35,6 +35,7 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/LEB128.h"
 #include "llvm/Target/TargetOptions.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <cstdlib>
 
 #define DEBUG_TYPE "x86-fl"
@@ -2304,7 +2305,7 @@ void X86FrameLowering::emitEpilogue(MachineFunction &MF,
   bool HasFP = hasFP(MF);
   uint64_t NumBytes = 0;
 
-  bool NeedsDwarfCFI = (!MF.getTarget().getTargetTriple().isOSDarwin() &&
+  bool NeedsDwarfCFI = (!TripleUtils::isOSDarwin(MF.getTarget().getTargetTriple()) &&
                         !MF.getTarget().getTargetTriple().isOSWindows()) &&
                        MF.needsFrameMoves();
 

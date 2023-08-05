@@ -131,7 +131,7 @@ static std::vector<MCInst> loadImmediate(unsigned Reg, bool IsGPR32,
 }
 
 unsigned ExegesisMipsTarget::getScratchMemoryRegister(const Triple &TT) const {
-  return TT.isArch64Bit() ? Mips::A0_64 : Mips::A0;
+  return TripleUtils::isArch64Bit(TT) ? Mips::A0_64 : Mips::A0;
 }
 
 void ExegesisMipsTarget::fillMemoryOperands(InstructionTemplate &IT,

@@ -18,6 +18,7 @@
 #include "llvm/BinaryFormat/MachO.h"
 #include "llvm/Support/Compiler.h"
 #include "llvm/TargetParser/ARMTargetParser.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 using namespace lldb;
 using namespace lldb_private;
@@ -721,11 +722,11 @@ bool ArchSpec::CharIsSignedByDefault() const {
   case llvm::Triple::armeb:
   case llvm::Triple::thumb:
   case llvm::Triple::thumbeb:
-    return m_triple.isOSDarwin() || m_triple.isOSWindows();
+    return llvm::TripleUtils::isOSDarwin(m_triple) || m_triple.isOSWindows();
 
   case llvm::Triple::ppc:
   case llvm::Triple::ppc64:
-    return m_triple.isOSDarwin();
+    return llvm::TripleUtils::isOSDarwin(m_triple);
 
   case llvm::Triple::ppc64le:
   case llvm::Triple::systemz:
@@ -1415,7 +1416,8 @@ bool ArchSpec::IsFullySpecifiedTriple() const {
 
   const unsigned unspecified = 0;
   const llvm::Triple &triple = GetTriple();
-  if (triple.isOSDarwin() && triple.getOSMajorVersion() == unspecified)
+  if (llvm::TripleUtils::isOSDarwin(triple) &&
+      triple.getOSMajorVersion() == unspecified)
     return false;
 
   return true;

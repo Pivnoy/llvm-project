@@ -214,7 +214,7 @@ public:
 
   int getDwarfEHStackPointer(CodeGen::CodeGenModule &CGM) const override {
     // Darwin uses different dwarf register numbers for EH.
-    if (CGM.getTarget().getTriple().isOSDarwin()) return 5;
+    if (llvm::TripleUtils::isOSDarwin(CGM.getTarget().getTriple())) return 5;
     return 4;
   }
 
@@ -1085,7 +1085,7 @@ bool X86_32TargetCodeGenInfo::isStructReturnInRegABI(
     return true;
   }
 
-  if (Triple.isOSDarwin() || Triple.isOSIAMCU())
+  if (llvm::TripleUtils::isOSDarwin(Triple) || Triple.isOSIAMCU())
     return true;
 
   switch (Triple.getOS()) {
@@ -1142,7 +1142,7 @@ bool X86_32TargetCodeGenInfo::initDwarfEHRegSizeTable(
   // 8 is %eip.
   AssignToArrayRange(Builder, Address, Four8, 0, 8);
 
-  if (CGF.CGM.getTarget().getTriple().isOSDarwin()) {
+  if (llvm::TripleUtils::isOSDarwin(CGF.CGM.getTarget().getTriple())) {
     // 12-16 are st(0..4).  Not sure why we stop at 4.
     // These have size 16, which is sizeof(long double) on
     // platforms with 8-byte alignment for that type.
@@ -1297,7 +1297,7 @@ class X86_64ABIInfo : public ABIInfo {
   /// required strict binary compatibility with older versions of GCC
   /// may need to exempt themselves.
   bool honorsRevision0_98() const {
-    return !getTarget().getTriple().isOSDarwin();
+    return !llvm::TripleUtils::isOSDarwin(getTarget().getTriple());
   }
 
   /// GCC classifies <1 x long long> as SSE but some platform ABIs choose to
@@ -1309,7 +1309,7 @@ class X86_64ABIInfo : public ABIInfo {
       return false;
 
     const llvm::Triple &Triple = getTarget().getTriple();
-    if (Triple.isOSDarwin() || Triple.isPS() || Triple.isOSFreeBSD())
+    if (llvm::TripleUtils::isOSDarwin(Triple) || Triple.isPS() || Triple.isOSFreeBSD())
       return false;
     return true;
   }

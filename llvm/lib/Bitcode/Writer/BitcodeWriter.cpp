@@ -69,6 +69,7 @@
 #include "llvm/Support/SHA1.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -4872,7 +4873,7 @@ void llvm::WriteBitcodeToFile(const Module &M, raw_ostream &Out,
   // If this is darwin or another generic macho target, reserve space for the
   // header.
   Triple TT(M.getTargetTriple());
-  if (TT.isOSDarwin() || TT.isOSBinFormatMachO())
+  if (TripleUtils::isOSDarwin(TT) || TT.isOSBinFormatMachO())
     Buffer.insert(Buffer.begin(), BWH_HeaderSize, 0);
 
   BitcodeWriter Writer(Buffer, dyn_cast<raw_fd_stream>(&Out));
@@ -4881,7 +4882,7 @@ void llvm::WriteBitcodeToFile(const Module &M, raw_ostream &Out,
   Writer.writeSymtab();
   Writer.writeStrtab();
 
-  if (TT.isOSDarwin() || TT.isOSBinFormatMachO())
+  if (TripleUtils::isOSDarwin(TT)  || TT.isOSBinFormatMachO())
     emitDarwinBCHeaderAndTrailer(Buffer, TT);
 
   // Write the generated bitstream to "Out".

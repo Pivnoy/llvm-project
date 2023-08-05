@@ -728,9 +728,9 @@ static void remapSectionsAndSymbols(const llvm::Triple &TargetTriple,
   // If the -target-addr-end option wasn't explicitly passed, then set it to a
   // sensible default based on the target triple.
   if (TargetAddrEnd.getNumOccurrences() == 0) {
-    if (TargetTriple.isArch16Bit())
+    if (TripleUtils::isArch16Bit(TargetTriple))
       TargetAddrEnd = (1ULL << 16) - 1;
-    else if (TargetTriple.isArch32Bit())
+    else if (TripleUtils::isArch32Bit(TargetTriple))
       TargetAddrEnd = (1ULL << 32) - 1;
     // TargetAddrEnd already has a sensible default for 64-bit systems, so
     // there's nothing to do in the 64-bit case.

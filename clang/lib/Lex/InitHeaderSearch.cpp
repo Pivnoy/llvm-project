@@ -425,7 +425,7 @@ void InitHeaderSearch::AddDefaultIncludePaths(
 
   // NOTE: some additional header search logic is handled in the driver for
   // Darwin.
-  if (triple.isOSDarwin()) {
+  if (llvm::TripleUtils::isOSDarwin(triple)) {
     if (HSOpts.UseStandardSystemIncludes) {
       // Add the default framework include paths on Darwin.
       if (triple.isDriverKit()) {

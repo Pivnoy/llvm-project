@@ -133,12 +133,12 @@ std::unique_ptr<TargetInfo> AllocateTarget(const llvm::Triple &Triple,
     return std::make_unique<LanaiTargetInfo>(Triple, Opts);
 
   case llvm::Triple::aarch64_32:
-    if (Triple.isOSDarwin())
+    if (llvm::TripleUtils::isOSDarwin(Triple))
       return std::make_unique<DarwinAArch64TargetInfo>(Triple, Opts);
 
     return nullptr;
   case llvm::Triple::aarch64:
-    if (Triple.isOSDarwin())
+    if (llvm::TripleUtils::isOSDarwin(Triple))
       return std::make_unique<DarwinAArch64TargetInfo>(Triple, Opts);
 
     switch (os) {
@@ -242,7 +242,7 @@ std::unique_ptr<TargetInfo> AllocateTarget(const llvm::Triple &Triple,
 
   case llvm::Triple::armeb:
   case llvm::Triple::thumbeb:
-    if (Triple.isOSDarwin())
+    if (llvm::TripleUtils::isOSDarwin(Triple))
       return std::make_unique<DarwinARMTargetInfo>(Triple, Opts);
 
     switch (os) {
@@ -537,7 +537,7 @@ std::unique_ptr<TargetInfo> AllocateTarget(const llvm::Triple &Triple,
     return std::make_unique<TCELETargetInfo>(Triple, Opts);
 
   case llvm::Triple::x86:
-    if (Triple.isOSDarwin())
+    if (llvm::TripleUtils::isOSDarwin(Triple))
       return std::make_unique<DarwinI386TargetInfo>(Triple, Opts);
 
     switch (os) {
@@ -603,7 +603,7 @@ std::unique_ptr<TargetInfo> AllocateTarget(const llvm::Triple &Triple,
     }
 
   case llvm::Triple::x86_64:
-    if (Triple.isOSDarwin() || Triple.isOSBinFormatMachO())
+    if (llvm::TripleUtils::isOSDarwin(Triple) || Triple.isOSBinFormatMachO())
       return std::make_unique<DarwinX86_64TargetInfo>(Triple, Opts);
 
     switch (os) {

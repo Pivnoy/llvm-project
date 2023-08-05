@@ -369,7 +369,7 @@ ABIArgInfo PPC32_SVR4_ABIInfo::classifyReturnType(QualType RetTy) const {
 // DefaultABIInfo::EmitVAArg.
 Address PPC32_SVR4_ABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAList,
                                       QualType Ty) const {
-  if (getTarget().getTriple().isOSDarwin()) {
+  if (llvm::TripleUtils::isOSDarwin(getTarget().getTriple())) {
     auto TI = getContext().getTypeInfoInChars(Ty);
     TI.Align = getParamTypeAlignment(Ty);
 

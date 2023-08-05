@@ -38,6 +38,7 @@
 #include "llvm/TargetParser/Host.h"
 #include "llvm/TargetParser/SubtargetFeature.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "llvm/Transforms/Utils/GlobalStatus.h"
 #include <system_error>
 using namespace llvm;
@@ -217,7 +218,7 @@ LTOModule::makeLTOModule(MemoryBufferRef Buffer, const TargetOptions &options,
   std::string FeatureStr = Features.getString();
   // Set a default CPU for Darwin triples.
   std::string CPU;
-  if (Triple.isOSDarwin()) {
+  if (TripleUtils::isOSDarwin(Triple)) {
     if (Triple.getArch() == llvm::Triple::x86_64)
       CPU = "core2";
     else if (Triple.getArch() == llvm::Triple::x86)

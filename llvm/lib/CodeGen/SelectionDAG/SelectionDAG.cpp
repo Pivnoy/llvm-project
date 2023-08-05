@@ -68,6 +68,7 @@
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "llvm/Transforms/Utils/SizeOpts.h"
 #include <algorithm>
 #include <cassert>
@@ -7190,7 +7191,7 @@ static bool shouldLowerMemFuncForSize(const MachineFunction &MF,
                                       SelectionDAG &DAG) {
   // On Darwin, -Os means optimize for size without hurting performance, so
   // only really optimize for size when -Oz (MinSize) is used.
-  if (MF.getTarget().getTargetTriple().isOSDarwin())
+  if (TripleUtils::isOSDarwin(MF.getTarget().getTargetTriple()))
     return MF.getFunction().hasMinSize();
   return DAG.shouldOptForSize();
 }

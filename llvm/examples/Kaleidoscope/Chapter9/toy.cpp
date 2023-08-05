@@ -10,6 +10,7 @@
 #include "llvm/IR/Verifier.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/TargetParser/Host.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "llvm/Transforms/Scalar.h"
 #include <cctype>
 #include <cstdio>
@@ -1436,7 +1437,7 @@ int main() {
                            DEBUG_METADATA_VERSION);
 
   // Darwin only supports dwarf2.
-  if (Triple(sys::getProcessTriple()).isOSDarwin())
+  if (llvm::TripleUtils::isOSDarwin(Triple(sys::getProcessTriple())))
     TheModule->addModuleFlag(llvm::Module::Warning, "Dwarf Version", 2);
 
   // Construct the DIBuilder, we do this here because we need the module.

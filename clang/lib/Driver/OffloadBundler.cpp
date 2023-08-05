@@ -43,6 +43,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Host.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -1086,7 +1087,7 @@ Error OffloadBundler::UnbundleFiles() {
 }
 
 static Archive::Kind getDefaultArchiveKindForHost() {
-  return Triple(sys::getDefaultTargetTriple()).isOSDarwin() ? Archive::K_DARWIN
+  return TripleUtils::isOSDarwin(Triple(sys::getDefaultTargetTriple())) ? Archive::K_DARWIN
                                                             : Archive::K_GNU;
 }
 

@@ -16,6 +16,7 @@
 #include "llvm/Object/OffloadBinary.h"
 #include "llvm/Support/Error.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "llvm/Transforms/Utils/ModuleUtils.h"
 
 using namespace llvm;
@@ -300,7 +301,7 @@ GlobalVariable *createFatbinDesc(Module &M, ArrayRef<char> Image, bool IsHIP) {
   // Create the global string containing the fatbinary.
   StringRef FatbinConstantSection =
       IsHIP ? ".hip_fatbin"
-            : (Triple.isMacOSX() ? "__NV_CUDA,__nv_fatbin" : ".nv_fatbin");
+            : (llvm::TripleUtils::isMacOSX(Triple) ? "__NV_CUDA,__nv_fatbin" : ".nv_fatbin");
   auto *Data = ConstantDataArray::get(C, Image);
   auto *Fatbin = new GlobalVariable(M, Data->getType(), /*isConstant*/ true,
                                     GlobalVariable::InternalLinkage, Data,
@@ -309,7 +310,7 @@ GlobalVariable *createFatbinDesc(Module &M, ArrayRef<char> Image, bool IsHIP) {
 
   // Create the fatbinary wrapper
   StringRef FatbinWrapperSection = IsHIP               ? ".hipFatBinSegment"
-                                   : Triple.isMacOSX() ? "__NV_CUDA,__fatbin"
+                                   : llvm::TripleUtils::isMacOSX(Triple) ? "__NV_CUDA,__fatbin"
                                                        : ".nvFatBinSegment";
   Constant *FatbinWrapper[] = {
       ConstantInt::get(Type::getInt32Ty(C), IsHIP ? HIPFatMagic : CudaFatMagic),

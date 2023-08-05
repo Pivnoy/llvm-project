@@ -25,6 +25,7 @@
 #include "llvm/Support/CodeGen.h"
 #include "llvm/Target/TargetLoweringObjectFile.h"
 #include "llvm/Transforms/Scalar.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <optional>
 #include <string>
 
@@ -78,7 +79,7 @@ static std::string computeDataLayout(const Triple &TT) {
 }
 
 static std::unique_ptr<TargetLoweringObjectFile> createTLOF(const Triple &TT) {
-  if (TT.isOSzOS())
+  if (TripleUtils::isOSzOS(TT))
     return std::make_unique<TargetLoweringObjectFileGOFF>();
 
   // Note: Some times run with -triple s390x-unknown.

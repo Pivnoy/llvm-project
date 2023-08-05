@@ -666,8 +666,8 @@ void CallAndMessageChecker::emitNilReceiverBug(CheckerContext &C,
 
 static bool supportsNilWithFloatRet(const llvm::Triple &triple) {
   return (triple.getVendor() == llvm::Triple::Apple &&
-          (triple.isiOS() || triple.isWatchOS() ||
-           !triple.isMacOSXVersionLT(10,5)));
+          (llvm::TripleUtils::isiOS(triple) || triple.isWatchOS() ||
+           !llvm::TripleUtils::isMacOSXVersionLT(triple, 10, 5)));
 }
 
 void CallAndMessageChecker::HandleNilReceiver(CheckerContext &C,

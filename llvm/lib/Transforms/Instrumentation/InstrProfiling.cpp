@@ -47,6 +47,7 @@
 #include "llvm/Support/Error.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "llvm/Transforms/Utils/ModuleUtils.h"
 #include "llvm/Transforms/Utils/SSAUpdater.h"
 #include <algorithm>
@@ -914,7 +915,7 @@ static inline Constant *getFuncAddrForProfData(Function *Fn) {
 
 static bool needsRuntimeRegistrationOfSectionRange(const Triple &TT) {
   // Don't do this for Darwin.  compiler-rt uses linker magic.
-  if (TT.isOSDarwin())
+  if (TripleUtils::isOSDarwin(TT) )
     return false;
   // Use linker script magic to get data/cnts/name start/end.
   if (TT.isOSAIX() || TT.isOSLinux() || TT.isOSFreeBSD() || TT.isOSNetBSD() ||

@@ -3995,7 +3995,7 @@ static llvm::Value *emitIsPlatformVersionAtLeast(CodeGenFunction &CGF,
 llvm::Value *
 CodeGenFunction::EmitBuiltinAvailable(const VersionTuple &Version) {
   // Darwin uses the new __isPlatformVersionAtLeast family of routines.
-  if (CGM.getTarget().getTriple().isOSDarwin())
+  if (llvm::TripleUtils::isOSDarwin(CGM.getTarget().getTriple()))
     return emitIsPlatformVersionAtLeast(*this, Version);
 
   if (!CGM.IsOSVersionAtLeastFn) {
@@ -4046,7 +4046,7 @@ void CodeGenModule::emitAtAvailableLinkGuard() {
   if (!IsPlatformVersionAtLeastFn)
     return;
   // @available requires CoreFoundation only on Darwin.
-  if (!Target.getTriple().isOSDarwin())
+  if (!llvm::TripleUtils::isOSDarwin(Target.getTriple()))
     return;
   // @available doesn't need Foundation on macOS 10.15+, iOS/tvOS 13+, or
   // watchOS 6+.

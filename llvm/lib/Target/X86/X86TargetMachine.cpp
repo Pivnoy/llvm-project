@@ -49,6 +49,7 @@
 #include "llvm/Target/TargetLoweringObjectFile.h"
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "llvm/Transforms/CFGuard.h"
 #include <memory>
 #include <optional>
@@ -125,14 +126,14 @@ static std::string computeDataLayout(const Triple &TT) {
 
   Ret += DataLayout::getManglingComponent(TT);
   // X86 and x32 have 32 bit pointers.
-  if (!TT.isArch64Bit() || TT.isX32() || TT.isOSNaCl())
+  if (!TripleUtils::isArch64Bit(TT) || TT.isX32() || TT.isOSNaCl())
     Ret += "-p:32:32";
 
   // Address spaces for 32 bit signed, 32 bit unsigned, and 64 bit pointers.
   Ret += "-p270:32:32-p271:32:32-p272:64:64";
 
   // Some ABIs align 64 bit integers and doubles to 64 bits, others to 32.
-  if (TT.isArch64Bit() || TT.isOSWindows() || TT.isOSNaCl())
+  if (TripleUtils::isArch64Bit(TT)|| TT.isOSWindows() || TT.isOSNaCl())
     Ret += "-i64:64";
   else if (TT.isOSIAMCU())
     Ret += "-i64:32-f64:32";
@@ -142,7 +143,7 @@ static std::string computeDataLayout(const Triple &TT) {
   // Some ABIs align long double to 128 bits, others to 32.
   if (TT.isOSNaCl() || TT.isOSIAMCU())
     ; // No f80
-  else if (TT.isArch64Bit() || TT.isOSDarwin() || TT.isWindowsMSVCEnvironment())
+  else if (TripleUtils::isArch64Bit(TT) || TripleUtils::isOSDarwin(TT) || TT.isWindowsMSVCEnvironment())
     Ret += "-f80:128";
   else
     Ret += "-f80:32";
@@ -151,13 +152,13 @@ static std::string computeDataLayout(const Triple &TT) {
     Ret += "-f128:32";
 
   // The registers can hold 8, 16, 32 or, in x86-64, 64 bits.
-  if (TT.isArch64Bit())
+  if (TripleUtils::isArch64Bit(TT))
     Ret += "-n8:16:32:64";
   else
     Ret += "-n8:16:32";
 
   // The stack is aligned to 32 bits on some ABIs and 128 bits on others.
-  if ((!TT.isArch64Bit() && TT.isOSWindows()) || TT.isOSIAMCU())
+  if ((!TripleUtils::isArch64Bit(TT) && TT.isOSWindows()) || TT.isOSIAMCU())
     Ret += "-a:0:32-S32";
   else
     Ret += "-S128";
@@ -177,7 +178,7 @@ static Reloc::Model getEffectiveRelocModel(const Triple &TT, bool JIT,
     // Darwin defaults to PIC in 64 bit mode and dynamic-no-pic in 32 bit mode.
     // Win64 requires rip-rel addressing, thus we force it to PIC. Otherwise we
     // use static relocation model by default.
-    if (TT.isOSDarwin()) {
+    if (TripleUtils::isOSDarwin(TT)) {
       if (is64Bit)
         return Reloc::PIC_;
       return Reloc::DynamicNoPIC;
@@ -194,13 +195,13 @@ static Reloc::Model getEffectiveRelocModel(const Triple &TT, bool JIT,
   if (*RM == Reloc::DynamicNoPIC) {
     if (is64Bit)
       return Reloc::PIC_;
-    if (!TT.isOSDarwin())
+    if (!TripleUtils::isOSDarwin(TT))
       return Reloc::Static;
   }
 
   // If we are on Darwin, disallow static relocation model in X86-64 mode, since
   // the Mach-O file format doesn't support it.
-  if (*RM == Reloc::Static && TT.isOSDarwin() && is64Bit)
+  if (*RM == Reloc::Static && TripleUtils::isOSDarwin(TT) && is64Bit)
     return Reloc::PIC_;
 
   return *RM;
@@ -607,7 +608,7 @@ void X86PassConfig::addPreEmitPass2() {
   // Verify basic block incoming and outgoing cfa offset and register values and
   // correct CFA calculation rule where needed by inserting appropriate CFI
   // instructions.
-  if (!TT.isOSDarwin() &&
+  if (!TripleUtils::isOSDarwin(TT) &&
       (!TT.isOSWindows() ||
        MAI->getExceptionHandlingType() == ExceptionHandling::DwarfCFI))
     addPass(createCFIInstrInserter());
@@ -631,7 +632,7 @@ void X86PassConfig::addPreEmitPass2() {
     const Function &F = MF.getFunction();
     const Module *M = F.getParent();
     return M->getModuleFlag("kcfi") ||
-           (TT.isOSDarwin() &&
+           (TripleUtils::isOSDarwin(TT) &&
             (M->getFunction("objc_retainAutoreleasedReturnValue") ||
              M->getFunction("objc_unsafeClaimAutoreleasedReturnValue")));
   }));

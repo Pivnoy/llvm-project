@@ -35,6 +35,7 @@
 #include "llvm/Transforms/Utils/Cloning.h"
 #include "llvm/Transforms/Utils/Local.h"
 #include "llvm/Transforms/Utils/SSAUpdater.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 using namespace llvm;
 
@@ -390,7 +391,7 @@ static void calculateCXXStateNumbers(WinEHFuncInfo &FuncInfo,
     //  stored in pre-order (outer first, inner next), not post-order
     //  Add to map here.  Fix the CatchHigh after children are processed
     const Module *Mod = BB->getParent()->getParent();
-    bool IsPreOrder = Triple(Mod->getTargetTriple()).isArch64Bit();
+    bool IsPreOrder = TripleUtils::isArch64Bit(Triple(Mod->getTargetTriple()));
     if (IsPreOrder)
       addTryBlockMapEntry(FuncInfo, TryLow, TryHigh, CatchLow, Handlers);
     unsigned TBMEIdx = FuncInfo.TryBlockMap.size() - 1;

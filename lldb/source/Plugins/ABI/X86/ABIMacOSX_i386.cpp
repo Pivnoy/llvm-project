@@ -13,6 +13,7 @@
 
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 #include "lldb/Core/Module.h"
 #include "lldb/Core/PluginManager.h"
@@ -51,7 +52,7 @@ size_t ABIMacOSX_i386::GetRedZoneSize() const { return 0; }
 ABISP
 ABIMacOSX_i386::CreateInstance(lldb::ProcessSP process_sp, const ArchSpec &arch) {
   if ((arch.GetTriple().getArch() == llvm::Triple::x86) &&
-      (arch.GetTriple().isMacOSX() || arch.GetTriple().isiOS() ||
+      (llvm::TripleUtils::isMacOSX(arch.GetTriple()) || llvm::TripleUtils::isiOS(arch.GetTriple()) ||
        arch.GetTriple().isWatchOS())) {
     return ABISP(
         new ABIMacOSX_i386(std::move(process_sp), MakeMCRegisterInfo(arch)));

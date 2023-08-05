@@ -783,17 +783,17 @@ llvm::Function *CGNVCUDARuntime::makeModuleCtorFunction() {
     FatMagic = HIPFatMagic;
   } else {
     if (RelocatableDeviceCode)
-      FatbinConstantName = CGM.getTriple().isMacOSX()
+      FatbinConstantName = llvm::TripleUtils::isMacOSX(CGM.getTriple())
                                ? "__NV_CUDA,__nv_relfatbin"
                                : "__nv_relfatbin";
     else
       FatbinConstantName =
-          CGM.getTriple().isMacOSX() ? "__NV_CUDA,__nv_fatbin" : ".nv_fatbin";
+          llvm::TripleUtils::isMacOSX(CGM.getTriple()) ? "__NV_CUDA,__nv_fatbin" : ".nv_fatbin";
     // NVIDIA's cuobjdump looks for fatbins in this section.
     FatbinSectionName =
-        CGM.getTriple().isMacOSX() ? "__NV_CUDA,__fatbin" : ".nvFatBinSegment";
+        llvm::TripleUtils::isMacOSX(CGM.getTriple()) ? "__NV_CUDA,__fatbin" : ".nvFatBinSegment";
 
-    ModuleIDSectionName = CGM.getTriple().isMacOSX()
+    ModuleIDSectionName = llvm::TripleUtils::isMacOSX(CGM.getTriple())
                               ? "__NV_CUDA,__nv_module_id"
                               : "__nv_module_id";
     ModuleIDPrefix = "__nv_";

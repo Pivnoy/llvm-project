@@ -25,6 +25,7 @@
 #include "llvm/IR/EHPersonalities.h"
 #include "llvm/IR/GlobalValue.h"
 #include "llvm/Target/TargetMachine.h"
+#include "llvm/TargetParser/TripleUtils.h"
 using namespace llvm;
 
 #define DEBUG_TYPE "x86-pseudo"
@@ -251,7 +252,7 @@ void X86ExpandPseudo::expandCALL_RVMARKER(MachineBasicBlock &MBB,
   auto &TM = MBB.getParent()->getTarget();
   // On Darwin platforms, wrap the expanded sequence in a bundle to prevent
   // later optimizations from breaking up the sequence.
-  if (TM.getTargetTriple().isOSDarwin())
+  if (TripleUtils::isOSDarwin(TM.getTargetTriple()))
     finalizeBundle(MBB, OriginalCall->getIterator(),
                    std::next(RtCall->getIterator()));
 }

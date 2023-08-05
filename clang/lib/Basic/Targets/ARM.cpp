@@ -262,18 +262,18 @@ ARMTargetInfo::ARMTargetInfo(const llvm::Triple &Triple,
   // environment where size_t is `unsigned long` rather than `unsigned int`
 
   PtrDiffType = IntPtrType =
-      (Triple.isOSDarwin() || Triple.isOSBinFormatMachO() || IsOpenBSD ||
+      (llvm::TripleUtils::isOSDarwin(Triple) || Triple.isOSBinFormatMachO() || IsOpenBSD ||
        IsNetBSD)
           ? SignedLong
           : SignedInt;
 
-  SizeType = (Triple.isOSDarwin() || Triple.isOSBinFormatMachO() || IsOpenBSD ||
+  SizeType = (llvm::TripleUtils::isOSDarwin(Triple) || Triple.isOSBinFormatMachO() || IsOpenBSD ||
               IsNetBSD)
                  ? UnsignedLong
                  : UnsignedInt;
 
   // ptrdiff_t is inconsistent on Darwin
-  if ((Triple.isOSDarwin() || Triple.isOSBinFormatMachO()) &&
+  if ((llvm::TripleUtils::isOSDarwin(Triple) || Triple.isOSBinFormatMachO()) &&
       !Triple.isWatchABI())
     PtrDiffType = SignedInt;
 

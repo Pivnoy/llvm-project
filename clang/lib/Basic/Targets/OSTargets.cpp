@@ -49,13 +49,13 @@ void getDarwinDefines(MacroBuilder &Builder, const LangOptions &Opts,
 
   // Get the platform type and version number from the triple.
   VersionTuple OsVersion;
-  if (Triple.isMacOSX()) {
+  if (llvm::TripleUtils::isMacOSX(Triple)) {
     Triple.getMacOSXVersion(OsVersion);
     PlatformName = "macos";
   } else {
     OsVersion = Triple.getOSVersion();
     PlatformName = llvm::Triple::getOSTypeName(Triple.getOS());
-    if (PlatformName == "ios" && Triple.isMacCatalystEnvironment())
+    if (PlatformName == "ios" && llvm::TripleUtils::isMacCatalystEnvironment(Triple))
       PlatformName = "maccatalyst";
   }
 
@@ -69,13 +69,13 @@ void getDarwinDefines(MacroBuilder &Builder, const LangOptions &Opts,
 
   assert(OsVersion < VersionTuple(100) && "Invalid version!");
   char Str[7];
-  if (Triple.isMacOSX() && OsVersion < VersionTuple(10, 10)) {
+  if (llvm::TripleUtils::isMacOSX(Triple) && OsVersion < VersionTuple(10, 10)) {
     Str[0] = '0' + (OsVersion.getMajor() / 10);
     Str[1] = '0' + (OsVersion.getMajor() % 10);
     Str[2] = '0' + std::min(OsVersion.getMinor().value_or(0), 9U);
     Str[3] = '0' + std::min(OsVersion.getSubminor().value_or(0), 9U);
     Str[4] = '\0';
-  } else if (!Triple.isMacOSX() && OsVersion.getMajor() < 10) {
+  } else if (!llvm::TripleUtils::isMacOSX(Triple) && OsVersion.getMajor() < 10) {
     Str[0] = '0' + OsVersion.getMajor();
     Str[1] = '0' + (OsVersion.getMinor().value_or(0) / 10);
     Str[2] = '0' + (OsVersion.getMinor().value_or(0) % 10);
@@ -94,21 +94,21 @@ void getDarwinDefines(MacroBuilder &Builder, const LangOptions &Opts,
   }
 
   // Set the appropriate OS version define.
-  if (Triple.isTvOS()) {
+  if (llvm::TripleUtils::isTvOS(Triple)) {
     Builder.defineMacro("__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__", Str);
-  } else if (Triple.isiOS()) {
+  } else if (llvm::TripleUtils::isiOS(Triple)) {
     Builder.defineMacro("__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__", Str);
-  } else if (Triple.isWatchOS()) {
+  } else if (llvm::TripleUtils::isWatchOS(Triple)) {
     Builder.defineMacro("__ENVIRONMENT_WATCH_OS_VERSION_MIN_REQUIRED__", Str);
-  } else if (Triple.isDriverKit()) {
+  } else if (llvm::TripleUtils::isDriverKit(Triple)) {
     assert(OsVersion.getMinor().value_or(0) < 100 &&
            OsVersion.getSubminor().value_or(0) < 100 && "Invalid version!");
     Builder.defineMacro("__ENVIRONMENT_DRIVERKIT_VERSION_MIN_REQUIRED__", Str);
-  } else if (Triple.isMacOSX()) {
+  } else if (llvm::TripleUtils::isMacOSX(Triple)) {
     Builder.defineMacro("__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__", Str);
   }
 
-  if (Triple.isOSDarwin()) {
+  if (llvm::TripleUtils::isOSDarwin(Triple)) {
     // Any darwin OS defines a general darwin OS version macro in addition
     // to the other OS specific macros.
     assert(OsVersion.getMinor().value_or(0) < 100 &&
@@ -126,7 +126,7 @@ static void addMinGWDefines(const llvm::Triple &Triple, const LangOptions &Opts,
                             MacroBuilder &Builder) {
   DefineStd(Builder, "WIN32", Opts);
   DefineStd(Builder, "WINNT", Opts);
-  if (Triple.isArch64Bit()) {
+  if (llvm::TripleUtils::isArch64Bit(Triple)) {
     DefineStd(Builder, "WIN64", Opts);
     Builder.defineMacro("__MINGW64__");
   }
@@ -257,7 +257,7 @@ static void addVisualCDefines(const LangOptions &Opts, MacroBuilder &Builder) {
 void addWindowsDefines(const llvm::Triple &Triple, const LangOptions &Opts,
                        MacroBuilder &Builder) {
   Builder.defineMacro("_WIN32");
-  if (Triple.isArch64Bit())
+  if (llvm::TripleUtils::isArch64Bit(Triple))
     Builder.defineMacro("_WIN64");
   if (Triple.isWindowsGNUEnvironment())
     addMinGWDefines(Triple, Opts, Builder);

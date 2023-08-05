@@ -67,7 +67,7 @@ unsigned
 ExegesisPowerPCTarget::getScratchMemoryRegister(const Triple &TT) const {
   // R13 is reserved as Thread Pointer, we won't use threading in benchmark, so
   // use it as scratch memory register
-  return TT.isArch64Bit() ? PPC::X13 : PPC::R13;
+  return TripleUtils::isArch64Bit(TT) ? PPC::X13 : PPC::R13;
 }
 
 void ExegesisPowerPCTarget::fillMemoryOperands(InstructionTemplate &IT,

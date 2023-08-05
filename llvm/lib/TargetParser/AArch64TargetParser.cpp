@@ -14,6 +14,7 @@
 #include "llvm/TargetParser/AArch64TargetParser.h"
 #include "llvm/TargetParser/ARMTargetParserCommon.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <cctype>
 
 using namespace llvm;
@@ -95,7 +96,7 @@ void AArch64::fillValidCPUArchList(SmallVectorImpl<StringRef> &Values) {
 }
 
 bool AArch64::isX18ReservedByDefault(const Triple &TT) {
-  return TT.isAndroid() || TT.isOSDarwin() || TT.isOSFuchsia() ||
+  return TT.isAndroid() || TripleUtils::isOSDarwin(TT) || TT.isOSFuchsia() ||
          TT.isOSWindows() || TT.isOHOSFamily();
 }
 

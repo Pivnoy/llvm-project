@@ -32,8 +32,8 @@ void aix::Assembler::ConstructJob(Compilation &C, const JobAction &JA,
                                   const char *LinkingOutput) const {
   ArgStringList CmdArgs;
 
-  const bool IsArch32Bit = getToolChain().getTriple().isArch32Bit();
-  const bool IsArch64Bit = getToolChain().getTriple().isArch64Bit();
+  const bool IsArch32Bit = llvm::TripleUtils::isArch32Bit(getToolChain().getTriple());
+  const bool IsArch64Bit = llvm::TripleUtils::isArch64Bit(getToolChain().getTriple());
   // Only support 32 and 64 bit.
   if (!IsArch32Bit && !IsArch64Bit)
     llvm_unreachable("Unsupported bit width value.");
@@ -107,8 +107,8 @@ void aix::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   const Driver &D = ToolChain.getDriver();
   ArgStringList CmdArgs;
 
-  const bool IsArch32Bit = ToolChain.getTriple().isArch32Bit();
-  const bool IsArch64Bit = ToolChain.getTriple().isArch64Bit();
+  const bool IsArch32Bit = llvm::TripleUtils::isArch32Bit(ToolChain.getTriple());
+  const bool IsArch64Bit = llvm::TripleUtils::isArch64Bit(ToolChain.getTriple());
   // Only support 32 and 64 bit.
   if (!(IsArch32Bit || IsArch64Bit))
     llvm_unreachable("Unsupported bit width value.");

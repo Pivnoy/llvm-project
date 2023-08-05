@@ -49,6 +49,7 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "llvm/Transforms/Instrumentation/AddressSanitizerCommon.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Transforms/Utils/MemoryTaggingSupport.h"
@@ -569,7 +570,7 @@ void HWAddressSanitizer::initializeModule() {
   // short granules, global or personality function instrumentation. On other
   // platforms we currently require using the latest version of the runtime.
   bool NewRuntime =
-      !TargetTriple.isAndroid() || !TargetTriple.isAndroidVersionLT(30);
+      !TargetTriple.isAndroid() || !TripleUtils::isAndroidVersionLT(TargetTriple, 30);
 
   UseShortGranules =
       ClUseShortGranules.getNumOccurrences() ? ClUseShortGranules : NewRuntime;

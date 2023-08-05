@@ -12,6 +12,7 @@
 
 #include "ARMMCAsmInfo.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 using namespace llvm;
 
@@ -34,7 +35,7 @@ ARMMCAsmInfoDarwin::ARMMCAsmInfoDarwin(const Triple &TheTriple) {
   MaxInstLength = 6;
 
   // Exceptions handling
-  ExceptionsType = (TheTriple.isOSDarwin() && !TheTriple.isWatchABI())
+  ExceptionsType = (TripleUtils::isOSDarwin(TheTriple) && !TripleUtils::isWatchABI(TheTriple))
                        ? ExceptionHandling::SjLj
                        : ExceptionHandling::DwarfCFI;
 }

@@ -25,6 +25,7 @@
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include "llvm/Support/ManagedStatic.h"
 #include "llvm/Support/TargetSelect.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -110,8 +111,9 @@ extern "C" int throw_exception() {
     GTEST_SKIP();
 
   // FIXME: libunwind on darwin is broken, see PR49692.
-  if (Triple.isOSDarwin() && (Triple.getArch() == llvm::Triple::aarch64 ||
-                              Triple.getArch() == llvm::Triple::aarch64_32))
+  if (llvm::TripleUtils::isOSDarwin(Triple) &&
+      (Triple.getArch() == llvm::Triple::aarch64 ||
+       Triple.getArch() == llvm::Triple::aarch64_32))
     GTEST_SKIP();
 
   llvm::cantFail(Interp->ParseAndExecute(ExceptionCode));

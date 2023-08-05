@@ -11214,7 +11214,7 @@ CheckPrintfHandler::checkFormatExpr(const analyze_printf::PrintfSpecifier &FS,
   // Special-case some of Darwin's platform-independence types by suggesting
   // casts to primitive types that are known to be large enough.
   bool ShouldNotPrintDirectly = false; StringRef CastTyName;
-  if (S.Context.getTargetInfo().getTriple().isOSDarwin()) {
+  if (llvm::TripleUtils::isOSDarwin(S.Context.getTargetInfo().getTriple())) {
     QualType CastTy;
     std::tie(CastTy, CastTyName) = shouldNotPrintDirectly(S.Context, IntendedTy, E);
     if (!CastTy.isNull()) {

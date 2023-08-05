@@ -291,10 +291,10 @@ getEffectivePPCCodeModel(const Triple &TT, std::optional<CodeModel::Model> CM,
 
   assert(TT.isOSBinFormatELF() && "All remaining PPC OSes are ELF based.");
 
-  if (TT.isArch32Bit())
+  if (TripleUtils::isArch32Bit(TT))
     return CodeModel::Small;
 
-  assert(TT.isArch64Bit() && "Unsupported PPC architecture.");
+  assert(TripleUtils::isArch64Bit(TT) && "Unsupported PPC architecture.");
   return CodeModel::Medium;
 }
 

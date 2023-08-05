@@ -31,7 +31,7 @@ XRayArgs::XRayArgs(const ToolChain &TC, const ArgList &Args) {
                     options::OPT_fno_xray_instrument, false))
     return;
   XRayInstrument = Args.getLastArg(options::OPT_fxray_instrument);
-  if (Triple.isMacOSX()) {
+  if (llvm::TripleUtils::isMacOSX(Triple)) {
     switch (Triple.getArch()) {
     case llvm::Triple::aarch64:
     case llvm::Triple::x86_64:

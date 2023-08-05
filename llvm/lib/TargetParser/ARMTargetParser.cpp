@@ -15,6 +15,7 @@
 #include "llvm/ADT/StringSwitch.h"
 #include "llvm/TargetParser/ARMTargetParserCommon.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <cctype>
 
 using namespace llvm;
@@ -503,7 +504,7 @@ StringRef ARM::computeDefaultTargetABI(const Triple &TT, StringRef CPU) {
         TT.getOS() == Triple::UnknownOS ||
         parseArchProfile(ArchName) == ProfileKind::M)
       return "aapcs";
-    if (TT.isWatchABI())
+    if (TripleUtils::isWatchABI(TT))
       return "aapcs16";
     return "apcs-gnu";
   } else if (TT.isOSWindows())

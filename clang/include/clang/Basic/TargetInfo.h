@@ -36,6 +36,7 @@
 #include "llvm/Support/Error.h"
 #include "llvm/Support/VersionTuple.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <cassert>
 #include <optional>
 #include <string>

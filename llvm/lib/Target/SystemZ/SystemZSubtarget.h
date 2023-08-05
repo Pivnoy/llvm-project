@@ -21,6 +21,7 @@
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <string>
 
 #define GET_SUBTARGETINFO_HEADER
@@ -121,7 +122,7 @@ public:
   bool isTargetXPLINK64() const { return (isTargetGOFF() && isTargetzOS()); }
 
   // Returns TRUE if we are generating code for a s390x machine running zOS
-  bool isTargetzOS() const { return TargetTriple.isOSzOS(); }
+  bool isTargetzOS() const { return TripleUtils::isOSzOS(TargetTriple); }
 };
 } // end namespace llvm
 

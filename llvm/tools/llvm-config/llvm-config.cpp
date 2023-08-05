@@ -27,6 +27,7 @@
 #include "llvm/Support/WithColor.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <cstdlib>
 #include <set>
 #include <unordered_set>
@@ -406,7 +407,7 @@ int main(int argc, char **argv) {
     }
     SharedDir = ActiveBinDir;
     StaticDir = ActiveLibDir;
-  } else if (HostTriple.isOSDarwin()) {
+  } else if (TripleUtils::isOSDarwin(HostTriple)) {
     SharedExt = "dylib";
     SharedVersionedExt = LLVM_DYLIB_VERSION ".dylib";
     StaticExt = "a";

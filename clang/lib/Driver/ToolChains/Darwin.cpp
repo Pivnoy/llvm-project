@@ -27,6 +27,7 @@
 #include "llvm/Support/VirtualFileSystem.h"
 #include "llvm/TargetParser/TargetParser.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <cstdlib> // ::getenv
 
 using namespace clang::driver;
@@ -127,7 +128,7 @@ void darwin::Assembler::ConstructJob(Compilation &C, const JobAction &JA,
   // FIXME: at run-time detect assembler capabilities or rely on version
   // information forwarded by -target-assembler-version.
   if (Args.hasArg(options::OPT_fno_integrated_as)) {
-    if (!(T.isMacOSX() && T.isMacOSXVersionLT(10, 7)))
+    if (!(llvm::TripleUtils::isMacOSX(T) && llvm::TripleUtils::isMacOSXVersionLT(T, 10, 7)))
       CmdArgs.push_back("-Q");
   }
 
@@ -1140,7 +1141,7 @@ void DarwinClang::addClangWarningOptions(ArgStringList &CC1Args) const {
   CC1Args.push_back("-Werror=undef-prefix");
 
   // For modern targets, promote certain warnings to errors.
-  if (isTargetWatchOSBased() || getTriple().isArch64Bit()) {
+  if (isTargetWatchOSBased() || llvm::TripleUtils::isArch64Bit(getTriple())) {
     // Always enable -Wdeprecated-objc-isa-usage and promote it
     // to an error.
     CC1Args.push_back("-Wdeprecated-objc-isa-usage");
@@ -1549,7 +1550,7 @@ void DarwinClang::AddLinkRuntimeLibArgs(const ArgList &Args,
 /// then the SDK version is returned. Otherwise the system version is returned.
 static std::string getSystemOrSDKMacOSVersion(StringRef MacOSSDKVersion) {
   llvm::Triple SystemTriple(llvm::sys::getProcessTriple());
-  if (!SystemTriple.isMacOSX())
+  if (!llvm::TripleUtils::isMacOSX(SystemTriple))
     return std::string(MacOSSDKVersion);
   VersionTuple SystemVersion;
   SystemTriple.getMacOSXVersion(SystemVersion);
@@ -1990,7 +1991,7 @@ std::string getOSVersion(llvm::Triple::OSType OS, const llvm::Triple &Triple,
   case llvm::Triple::MacOSX:
     // If there is no version specified on triple, and both host and target are
     // macos, use the host triple to infer OS version.
-    if (Triple.isMacOSX() && SystemTriple.isMacOSX() &&
+    if (llvm::TripleUtils::isMacOSX(Triple) && llvm::TripleUtils::isMacOSX(SystemTriple)  &&
         !Triple.getOSMajorVersion())
       SystemTriple.getMacOSXVersion(OsVersion);
     else if (!Triple.getMacOSXVersion(OsVersion))
@@ -2071,9 +2072,9 @@ std::optional<DarwinPlatform> getDeploymentTargetFromTargetArg(
       A->claim();
       // Accept a -target-variant triple when compiling code that may run on
       // macOS or Mac Catalust.
-      if ((Triple.isMacOSX() && TVT.getOS() == llvm::Triple::IOS &&
+      if ((llvm::TripleUtils::isMacOSX(Triple) && TVT.getOS() == llvm::Triple::IOS &&
            TVT.isMacCatalystEnvironment()) ||
-          (TVT.isMacOSX() && Triple.getOS() == llvm::Triple::IOS &&
+          (llvm::TripleUtils::isMacOSX(TVT) && Triple.getOS() == llvm::Triple::IOS &&
            Triple.isMacCatalystEnvironment())) {
         TargetVariantTriple = TVT;
         continue;
@@ -2281,7 +2282,7 @@ void Darwin::AddDeploymentTarget(DerivedArgList &Args) const {
     }
     // For 32-bit targets, the deployment target for iOS has to be earlier than
     // iOS 11.
-    if (getTriple().isArch32Bit() && Major >= 11) {
+    if (llvm::TripleUtils::isArch32Bit(getTriple()) && Major >= 11) {
       // If the deployment target is explicitly specified, print a diagnostic.
       if (OSTarget->isExplicitlySpecified()) {
         if (OSTarget->getEnvironment() == MacCatalyst)
@@ -3061,11 +3062,11 @@ void Darwin::addMinVersionArgs(const ArgList &Args,
   if (TargetVariantTriple) {
     assert(isTargetMacOSBased() && "unexpected target");
     VersionTuple VariantTargetVersion;
-    if (TargetVariantTriple->isMacOSX()) {
+    if (llvm::TripleUtils::isMacOSX(*TargetVariantTriple)) {
       CmdArgs.push_back("-macosx_version_min");
       TargetVariantTriple->getMacOSXVersion(VariantTargetVersion);
     } else {
-      assert(TargetVariantTriple->isiOS() &&
+      assert(llvm::TripleUtils::isiOS(*TargetVariantTriple) &&
              TargetVariantTriple->isMacCatalystEnvironment() &&
              "unexpected target variant triple");
       CmdArgs.push_back("-maccatalyst_version_min");
@@ -3175,7 +3176,7 @@ void Darwin::addPlatformVersionArgs(const llvm::opt::ArgList &Args,
     Platform = Darwin::MacOS;
     Environment = Darwin::NativeEnvironment;
   } else {
-    assert(TargetVariantTriple->isiOS() &&
+    assert(llvm::TripleUtils::isiOS(*TargetVariantTriple) &&
            TargetVariantTriple->isMacCatalystEnvironment() &&
            "unexpected target variant triple");
     TargetVariantVersion = TargetVariantTriple->getiOSVersion();

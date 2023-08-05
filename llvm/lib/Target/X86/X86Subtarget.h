@@ -20,6 +20,7 @@
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
 #include "llvm/IR/CallingConv.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <climits>
 #include <memory>
 
@@ -288,7 +289,7 @@ public:
 
   const Triple &getTargetTriple() const { return TargetTriple; }
 
-  bool isTargetDarwin() const { return TargetTriple.isOSDarwin(); }
+  bool isTargetDarwin() const { return TripleUtils::isOSDarwin(TargetTriple); }
   bool isTargetFreeBSD() const { return TargetTriple.isOSFreeBSD(); }
   bool isTargetDragonFly() const { return TargetTriple.isOSDragonFly(); }
   bool isTargetSolaris() const { return TargetTriple.isOSSolaris(); }

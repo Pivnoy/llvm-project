@@ -564,7 +564,7 @@ bool PPCTargetInfo::initFeatureMap(
       llvm::StringSwitch<bool>(CPU).Case("pwr9", true).Default(false);
 
   Features["quadword-atomics"] =
-      getTriple().isArch64Bit() && llvm::StringSwitch<bool>(CPU)
+      llvm::TripleUtils::isArch64Bit(getTriple()) && llvm::StringSwitch<bool>(CPU)
                                        .Case("pwr9", true)
                                        .Case("pwr8", true)
                                        .Default(false);

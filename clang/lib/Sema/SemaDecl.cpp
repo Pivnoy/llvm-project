@@ -12165,7 +12165,8 @@ void Sema::CheckMain(FunctionDecl* FD, const DeclSpec& DS) {
   // Darwin passes an undocumented fourth argument of type char**.  If
   // other platforms start sprouting these, the logic below will start
   // getting shifty.
-  if (nparams == 4 && Context.getTargetInfo().getTriple().isOSDarwin())
+  if (nparams == 4 &&
+      llvm::TripleUtils::isOSDarwin(Context.getTargetInfo().getTriple()))
     HasExtraParameters = false;
 
   if (HasExtraParameters) {

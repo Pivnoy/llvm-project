@@ -4649,7 +4649,7 @@ static void checkObjCMethodX86VectorTypes(Sema &SemaRef,
   VersionTuple AcceptedInVersion;
   if (Triple.getOS() == llvm::Triple::IOS)
     AcceptedInVersion = VersionTuple(/*Major=*/9);
-  else if (Triple.isMacOSX())
+  else if (llvm::TripleUtils::isMacOSX(Triple))
     AcceptedInVersion = VersionTuple(/*Major=*/10, /*Minor=*/11);
   else
     return;
@@ -4659,7 +4659,7 @@ static void checkObjCMethodX86VectorTypes(Sema &SemaRef,
   SemaRef.Diag(Loc, diag::err_objc_method_unsupported_param_ret_type)
       << T << (Method->getReturnType()->isVectorType() ? /*return value*/ 1
                                                        : /*parameter*/ 0)
-      << (Triple.isMacOSX() ? "macOS 10.11" : "iOS 9");
+      << (llvm::TripleUtils::isMacOSX(Triple) ? "macOS 10.11" : "iOS 9");
 }
 
 static void mergeObjCDirectMembers(Sema &S, Decl *CD, ObjCMethodDecl *Method) {

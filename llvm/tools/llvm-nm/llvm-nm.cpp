@@ -49,6 +49,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Host.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <vector>
 
 using namespace llvm;
@@ -1053,7 +1054,7 @@ static char getSymbolNMTypeChar(IRObjectFile &Obj, basic_symbol_iterator I) {
   // will be in bss or not, but we could approximate.
   if (Flags & SymbolRef::SF_Executable)
     return 't';
-  else if (Triple(Obj.getTargetTriple()).isOSDarwin() &&
+  else if (TripleUtils::isOSDarwin(Triple(Obj.getTargetTriple())) &&
            (Flags & SymbolRef::SF_Const))
     return 's';
   else

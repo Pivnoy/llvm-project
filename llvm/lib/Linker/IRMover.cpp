@@ -28,6 +28,7 @@
 #include "llvm/Support/Error.h"
 #include "llvm/Support/Path.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "llvm/Transforms/Utils/ValueMapper.h"
 #include <optional>
 #include <utility>
@@ -1598,7 +1599,7 @@ Error IRLinker::run() {
                 DstM.getModuleIdentifier() + "' is '" + DstM.getTargetTriple() +
                 "'\n");
 
-  DstM.setTargetTriple(SrcTriple.merge(DstTriple));
+  DstM.setTargetTriple(TripleUtils::merge(SrcTriple, DstTriple));
 
   // Loop over all of the linked values to compute type mappings.
   computeTypeMapping();

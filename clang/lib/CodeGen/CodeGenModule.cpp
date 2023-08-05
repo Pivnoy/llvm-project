@@ -69,6 +69,7 @@
 #include "llvm/Support/TimeProfiler.h"
 #include "llvm/Support/xxhash.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "llvm/TargetParser/X86TargetParser.h"
 #include <optional>
 
@@ -242,7 +243,7 @@ createTargetCodeGenInfo(CodeGenModule &CGM) {
     return createTCETargetCodeGenInfo(CGM);
 
   case llvm::Triple::x86: {
-    bool IsDarwinVectorABI = Triple.isOSDarwin();
+    bool IsDarwinVectorABI = llvm::TripleUtils::isOSDarwin(Triple);
     bool IsWin32FloatStructABI = Triple.isOSWindows() && !Triple.isOSCygMing();
 
     if (Triple.getOS() == llvm::Triple::Win32) {
@@ -2671,7 +2672,7 @@ void CodeGenModule::SetFunctionAttributes(GlobalDecl GD, llvm::Function *F,
   // where substantial code, including the libstdc++ dylib, was compiled with
   // GCC and does not actually return "this".
   if (!IsThunk && getCXXABI().HasThisReturn(GD) &&
-      !(getTriple().isiOS() && getTriple().isOSVersionLT(6))) {
+      !(llvm::TripleUtils::isiOS(getTriple()) && llvm::TripleUtils::isOSVersionLT(getTriple(), 6))) {
     assert(!F->arg_empty() &&
            F->arg_begin()->getType()
              ->canLosslesslyBitCastTo(F->getReturnType()) &&
@@ -5282,7 +5283,7 @@ void CodeGenModule::EmitGlobalVarDefinition(const VarDecl *D,
   // so we don't change the linkage.
   if (D->getTLSKind() == VarDecl::TLS_Dynamic &&
       Linkage == llvm::GlobalValue::ExternalLinkage &&
-      Context.getTargetInfo().getTriple().isOSDarwin() &&
+      llvm::TripleUtils::isOSDarwin(Context.getTargetInfo().getTriple()) &&
       !D->hasAttr<ConstInitAttr>())
     Linkage = llvm::GlobalValue::InternalLinkage;
 
@@ -5892,19 +5893,19 @@ CodeGenModule::GetAddrOfConstantCFString(const StringLiteral *Literal) {
     case LangOptions::CoreFoundationABI::Swift: [[fallthrough]];
     case LangOptions::CoreFoundationABI::Swift5_0:
       CFConstantStringClassName =
-          Triple.isOSDarwin() ? "$s15SwiftFoundation19_NSCFConstantStringCN"
+          llvm::TripleUtils::isOSDarwin(Triple) ? "$s15SwiftFoundation19_NSCFConstantStringCN"
                               : "$s10Foundation19_NSCFConstantStringCN";
       Ty = IntPtrTy;
       break;
     case LangOptions::CoreFoundationABI::Swift4_2:
       CFConstantStringClassName =
-          Triple.isOSDarwin() ? "$S15SwiftFoundation19_NSCFConstantStringCN"
+          llvm::TripleUtils::isOSDarwin(Triple) ? "$S15SwiftFoundation19_NSCFConstantStringCN"
                               : "$S10Foundation19_NSCFConstantStringCN";
       Ty = IntPtrTy;
       break;
     case LangOptions::CoreFoundationABI::Swift4_1:
       CFConstantStringClassName =
-          Triple.isOSDarwin() ? "__T015SwiftFoundation19_NSCFConstantStringCN"
+          llvm::TripleUtils::isOSDarwin(Triple) ? "__T015SwiftFoundation19_NSCFConstantStringCN"
                               : "__T010Foundation19_NSCFConstantStringCN";
       Ty = IntPtrTy;
       break;

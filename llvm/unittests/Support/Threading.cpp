@@ -10,6 +10,7 @@
 #include "llvm/Support/thread.h"
 #include "llvm/TargetParser/Host.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "gtest/gtest.h"
 
 #include <atomic>
@@ -26,10 +27,10 @@ static bool isThreadingSupportedArchAndOS() {
   // Initially this is only testing detection of the number of
   // physical cores, which is currently only supported/tested on
   // some systems.
-  return (Host.isOSWindows() && llvm_is_multithreaded()) || Host.isOSDarwin() ||
+  return (Host.isOSWindows() && llvm_is_multithreaded()) || TripleUtils::isOSDarwin(Host) ||
          (Host.isX86() && Host.isOSLinux()) ||
          (Host.isOSLinux() && !Host.isAndroid()) ||
-         (Host.isSystemZ() && Host.isOSzOS());
+         (Host.isSystemZ() && TripleUtils::isOSzOS(Host));
 #else
   return false;
 #endif

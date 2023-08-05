@@ -280,7 +280,7 @@ static StringRef computeDefaultCPU(const Triple &TT, StringRef CPU) {
 static Reloc::Model getEffectiveRelocModel(const Triple &TT,
                                            std::optional<Reloc::Model> RM) {
   // AArch64 Darwin and Windows are always PIC.
-  if (TT.isOSDarwin() || TT.isOSWindows())
+  if (TripleUtils::isOSDarwin(TT) || TT.isOSWindows())
     return Reloc::PIC_;
   // On ELF platforms the default static relocation model has a smart enough
   // linker to cope with referencing external symbols defined in a shared

@@ -441,100 +441,6 @@ public:
   /// @name Convenience Predicates
   /// @{
 
-  /// Test whether the architecture is 64-bit
-  ///
-  /// Note that this tests for 64-bit pointer width, and nothing else. Note
-  /// that we intentionally expose only three predicates, 64-bit, 32-bit, and
-  /// 16-bit. The inner details of pointer width for particular architectures
-  /// is not summed up in the triple, and so only a coarse grained predicate
-  /// system is provided.
-  bool isArch64Bit() const;
-
-  /// Test whether the architecture is 32-bit
-  ///
-  /// Note that this tests for 32-bit pointer width, and nothing else.
-  bool isArch32Bit() const;
-
-  /// Test whether the architecture is 16-bit
-  ///
-  /// Note that this tests for 16-bit pointer width, and nothing else.
-  bool isArch16Bit() const;
-
-  /// Helper function for doing comparisons against version numbers included in
-  /// the target triple.
-  bool isOSVersionLT(unsigned Major, unsigned Minor = 0,
-                     unsigned Micro = 0) const {
-    if (Minor == 0) {
-      return getOSVersion() < VersionTuple(Major);
-    }
-    if (Micro == 0) {
-      return getOSVersion() < VersionTuple(Major, Minor);
-    }
-    return getOSVersion() < VersionTuple(Major, Minor, Micro);
-  }
-
-  bool isOSVersionLT(const Triple &Other) const {
-    return getOSVersion() < Other.getOSVersion();
-  }
-
-  /// Comparison function for checking OS X version compatibility, which handles
-  /// supporting skewed version numbering schemes used by the "darwin" triples.
-  bool isMacOSXVersionLT(unsigned Major, unsigned Minor = 0,
-                         unsigned Micro = 0) const;
-
-  /// Is this a Mac OS X triple. For legacy reasons, we support both "darwin"
-  /// and "osx" as OS X triples.
-  bool isMacOSX() const {
-    return getOS() == Triple::Darwin || getOS() == Triple::MacOSX;
-  }
-
-  /// Is this an iOS triple.
-  /// Note: This identifies tvOS as a variant of iOS. If that ever
-  /// changes, i.e., if the two operating systems diverge or their version
-  /// numbers get out of sync, that will need to be changed.
-  /// watchOS has completely different version numbers so it is not included.
-  bool isiOS() const {
-    return getOS() == Triple::IOS || isTvOS();
-  }
-
-  /// Is this an Apple tvOS triple.
-  bool isTvOS() const {
-    return getOS() == Triple::TvOS;
-  }
-
-  /// Is this an Apple watchOS triple.
-  bool isWatchOS() const {
-    return getOS() == Triple::WatchOS;
-  }
-
-  bool isWatchABI() const {
-    return getSubArch() == Triple::ARMSubArch_v7k;
-  }
-
-  /// Is this an Apple DriverKit triple.
-  bool isDriverKit() const { return getOS() == Triple::DriverKit; }
-
-  bool isOSzOS() const { return getOS() == Triple::ZOS; }
-
-  /// Is this a "Darwin" OS (macOS, iOS, tvOS, watchOS, or DriverKit).
-  bool isOSDarwin() const {
-    return isMacOSX() || isiOS() || isWatchOS() || isDriverKit();
-  }
-
-  bool isSimulatorEnvironment() const {
-    return getEnvironment() == Triple::Simulator;
-  }
-
-  bool isMacCatalystEnvironment() const {
-    return getEnvironment() == Triple::MacABI;
-  }
-
-  /// Returns true for targets that run on a macOS machine.
-  bool isTargetMachineMac() const {
-    return isMacOSX() || (isOSDarwin() && (isSimulatorEnvironment() ||
-                                           isMacCatalystEnvironment()));
-  }
-
   bool isOSNetBSD() const {
     return getOS() == Triple::NetBSD;
   }
@@ -730,17 +636,17 @@ public:
   /// Tests whether the target is Android
   bool isAndroid() const { return getEnvironment() == Triple::Android; }
 
-  bool isAndroidVersionLT(unsigned Major) const {
-    assert(isAndroid() && "Not an Android triple!");
+  // bool isAndroidVersionLT(unsigned Major) const {
+  //   assert(isAndroid() && "Not an Android triple!");
 
-    VersionTuple Version = getEnvironmentVersion();
+  //   VersionTuple Version = getEnvironmentVersion();
 
-    // 64-bit targets did not exist before API level 21 (Lollipop).
-    if (isArch64Bit() && Version.getMajor() < 21)
-      return VersionTuple(21) < VersionTuple(Major);
+  //   // 64-bit targets did not exist before API level 21 (Lollipop).
+  //   if (isArch64Bit() && Version.getMajor() < 21)
+  //     return VersionTuple(21) < VersionTuple(Major);
 
-    return Version < VersionTuple(Major);
-  }
+  //   return Version < VersionTuple(Major);
+  // }
 
   /// Tests whether the environment is musl-libc
   bool isMusl() const {
@@ -992,7 +898,9 @@ public:
   ///
   /// Note: Android API level 29 (10) introduced ELF TLS.
   bool hasDefaultEmulatedTLS() const {
-    return (isAndroid() && isAndroidVersionLT(29)) || isOSOpenBSD() ||
+    // return (isAndroid() && isAndroidVersionLT(29)) || isOSOpenBSD() ||
+    //        isWindowsCygwinEnvironment() || isOHOSFamily();
+        return (isAndroid()) || isOSOpenBSD() ||
            isWindowsCygwinEnvironment() || isOHOSFamily();
   }
 
@@ -1086,8 +994,8 @@ public:
   /// Test whether target triples are compatible.
   bool isCompatibleWith(const Triple &Other) const;
 
-  /// Merge target triples.
-  std::string merge(const Triple &Other) const;
+  // /// Merge target triples.
+  // std::string merge(const Triple &Other) const;
 
   /// Some platforms have different minimum supported OS versions that
   /// varies by the architecture specified in the triple. This function

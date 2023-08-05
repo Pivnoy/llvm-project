@@ -357,15 +357,15 @@ static PrintfSpecifierResult ParsePrintfSpecifier(FormatStringHandler &H,
     case 'D':
       if (isFreeBSDKPrintf)
         k = ConversionSpecifier::FreeBSDDArg; // void * followed by char *
-      else if (Target.getTriple().isOSDarwin())
+      else if (llvm::TripleUtils::isOSDarwin(Target.getTriple()))
         k = ConversionSpecifier::DArg;
       break;
     case 'O':
-      if (Target.getTriple().isOSDarwin())
+      if (llvm::TripleUtils::isOSDarwin(Target.getTriple()))
         k = ConversionSpecifier::OArg;
       break;
     case 'U':
-      if (Target.getTriple().isOSDarwin())
+      if (llvm::TripleUtils::isOSDarwin(Target.getTriple()))
         k = ConversionSpecifier::UArg;
       break;
     // MS specific.
@@ -529,7 +529,7 @@ ArgType PrintfSpecifier::getScalarArgType(ASTContext &Ctx,
       case LengthModifier::AsSizeT:
         return ArgType::makeSizeT(ArgType(Ctx.getSignedSizeType(), "ssize_t"));
       case LengthModifier::AsInt3264:
-        return Ctx.getTargetInfo().getTriple().isArch64Bit()
+        return llvm::TripleUtils::isArch64Bit(Ctx.getTargetInfo().getTriple())
                    ? ArgType(Ctx.LongLongTy, "__int64")
                    : ArgType(Ctx.IntTy, "__int32");
       case LengthModifier::AsPtrDiff:
@@ -564,7 +564,7 @@ ArgType PrintfSpecifier::getScalarArgType(ASTContext &Ctx,
       case LengthModifier::AsSizeT:
         return ArgType::makeSizeT(ArgType(Ctx.getSizeType(), "size_t"));
       case LengthModifier::AsInt3264:
-        return Ctx.getTargetInfo().getTriple().isArch64Bit()
+        return llvm::TripleUtils::isArch64Bit(Ctx.getTargetInfo().getTriple())
                    ? ArgType(Ctx.UnsignedLongLongTy, "unsigned __int64")
                    : ArgType(Ctx.UnsignedIntTy, "unsigned __int32");
       case LengthModifier::AsPtrDiff:

@@ -46,6 +46,7 @@
 #include "llvm/Support/Error.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <optional>
 
 using namespace clang;
@@ -1988,7 +1989,7 @@ static void handleAliasAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
   if (!S.checkStringLiteralArgumentAttr(AL, 0, Str))
     return;
 
-  if (S.Context.getTargetInfo().getTriple().isOSDarwin()) {
+  if (llvm::TripleUtils::isOSDarwin(S.Context.getTargetInfo().getTriple())) {
     S.Diag(AL.getLoc(), diag::err_alias_not_supported_on_darwin);
     return;
   }
@@ -3194,7 +3195,8 @@ static void handleWeakImportAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
       S.Diag(AL.getLoc(), diag::warn_attribute_invalid_on_definition)
         << "weak_import";
     else if (isa<ObjCPropertyDecl>(D) || isa<ObjCMethodDecl>(D) ||
-             (S.Context.getTargetInfo().getTriple().isOSDarwin() &&
+             (llvm::TripleUtils::isOSDarwin(
+                  S.Context.getTargetInfo().getTriple()) &&
               (isa<ObjCInterfaceDecl>(D) || isa<EnumDecl>(D)))) {
       // Nothing to warn about here.
     } else
@@ -3311,7 +3313,7 @@ SectionAttr *Sema::mergeSectionAttr(Decl *D, const AttributeCommonInfo &CI,
 /// and give good diagnostics in cases when the assembler or code generator
 /// would otherwise reject the section specifier.
 llvm::Error Sema::isValidSectionSpecifier(StringRef SecName) {
-  if (!Context.getTargetInfo().getTriple().isOSDarwin())
+  if (!llvm::TripleUtils::isOSDarwin(Context.getTargetInfo().getTriple()))
     return llvm::Error::success();
 
   // Let MCSectionMachO validate this.

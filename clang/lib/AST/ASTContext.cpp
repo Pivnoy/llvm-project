@@ -86,6 +86,7 @@
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -7596,7 +7597,7 @@ CanQualType ASTContext::getNSUIntegerType() const {
   assert(Target && "Expected target to be initialized");
   const llvm::Triple &T = Target->getTriple();
   // Windows is LLP64 rather than LP64
-  if (T.isOSWindows() && T.isArch64Bit())
+  if (T.isOSWindows() && llvm::TripleUtils::isArch64Bit(T))
     return UnsignedLongLongTy;
   return UnsignedLongTy;
 }
@@ -7605,7 +7606,7 @@ CanQualType ASTContext::getNSIntegerType() const {
   assert(Target && "Expected target to be initialized");
   const llvm::Triple &T = Target->getTriple();
   // Windows is LLP64 rather than LP64
-  if (T.isOSWindows() && T.isArch64Bit())
+  if (T.isOSWindows() && llvm::TripleUtils::isArch64Bit(T))
     return LongLongTy;
   return LongTy;
 }
@@ -12319,11 +12320,11 @@ ASTContext::getTemplateParamObjectDecl(QualType T, const APValue &V) const {
 
 bool ASTContext::AtomicUsesUnsupportedLibcall(const AtomicExpr *E) const {
   const llvm::Triple &T = getTargetInfo().getTriple();
-  if (!T.isOSDarwin())
+  if (!llvm::TripleUtils::isOSDarwin(T))
     return false;
 
-  if (!(T.isiOS() && T.isOSVersionLT(7)) &&
-      !(T.isMacOSX() && T.isOSVersionLT(10, 9)))
+  if (!(llvm::TripleUtils::isiOS(T) && llvm::TripleUtils::isOSVersionLT(T, 7)) &&
+      !(llvm::TripleUtils::isMacOSX(T) && llvm::TripleUtils::isOSVersionLT(T, 10, 9)))
     return false;
 
   QualType AtomicTy = E->getPtr()->getType()->getPointeeType();

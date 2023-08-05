@@ -21,6 +21,7 @@
 #include "llvm/ADT/StringMap.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 namespace clang {
 
@@ -92,7 +93,7 @@ public:
     case iOS:
     case WatchOS:
     case AppleARM64:
-      return T.isOSDarwin();
+      return llvm::TripleUtils::isOSDarwin(T);
 
     case Fuchsia:
       return T.isOSFuchsia();

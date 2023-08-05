@@ -27,6 +27,7 @@
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Target/TargetLoweringObjectFile.h"
 #include "llvm/Target/TargetMachine.h"
+#include "llvm/TargetParser/TripleUtils.h"
 using namespace llvm;
 
 extern cl::opt<bool> EnableAArch64ELFLocalDynamicTLSGeneration;
@@ -270,7 +271,7 @@ MCOperand AArch64MCInstLower::lowerSymbolOperandCOFF(const MachineOperand &MO,
 
 MCOperand AArch64MCInstLower::LowerSymbolOperand(const MachineOperand &MO,
                                                  MCSymbol *Sym) const {
-  if (Printer.TM.getTargetTriple().isOSDarwin())
+  if (llvm::TripleUtils::isOSDarwin(Printer.TM.getTargetTriple()))
     return lowerSymbolOperandDarwin(MO, Sym);
   if (Printer.TM.getTargetTriple().isOSBinFormatCOFF())
     return lowerSymbolOperandCOFF(MO, Sym);

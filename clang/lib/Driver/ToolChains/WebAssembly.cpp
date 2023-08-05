@@ -65,7 +65,7 @@ void wasm::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   ArgStringList CmdArgs;
 
   CmdArgs.push_back("-m");
-  if (ToolChain.getTriple().isArch64Bit())
+  if (llvm::TripleUtils::isArch64Bit( ToolChain.getTriple()))
     CmdArgs.push_back("wasm64");
   else
     CmdArgs.push_back("wasm32");
@@ -173,7 +173,7 @@ WebAssembly::WebAssembly(const Driver &D, const llvm::Triple &Triple,
                          const llvm::opt::ArgList &Args)
     : ToolChain(D, Triple, Args) {
 
-  assert(Triple.isArch32Bit() != Triple.isArch64Bit());
+  assert(llvm::TripleUtils::isArch32Bit(Triple) != llvm::TripleUtils::isArch64Bit(Triple));
 
   getProgramPaths().push_back(getDriver().getInstalledDir());
 

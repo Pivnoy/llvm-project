@@ -14,6 +14,7 @@
 #include "llvm/Support/Program.h"
 #include "llvm/Support/Threading.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 #include "gtest/gtest.h"
 
@@ -420,7 +421,7 @@ TEST(HostTest, DummyRunAndGetCommandOutputUse) {
 
 TEST(HostTest, getMacOSHostVersion) {
   llvm::Triple HostTriple(llvm::sys::getProcessTriple());
-  if (!HostTriple.isMacOSX())
+  if (!llvm::TripleUtils::isMacOSX(HostTriple))
     GTEST_SKIP();
 
   const char *SwVersPath = "/usr/bin/sw_vers";

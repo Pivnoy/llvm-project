@@ -45,7 +45,7 @@ bool trans::canApplyWeak(ASTContext &Ctx, QualType type,
     return false;
 
   // iOS is always safe to use 'weak'.
-  if (Ctx.getTargetInfo().getTriple().isiOS() ||
+  if (llvm::TripleUtils::isiOS(Ctx.getTargetInfo().getTriple()) ||
       Ctx.getTargetInfo().getTriple().isWatchOS())
     AllowOnUnknownClass = true;
 

@@ -27,6 +27,7 @@
 #include "llvm/Support/Path.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Host.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -971,7 +972,7 @@ Archive::Archive(MemoryBufferRef Source, Error &Err)
 
 object::Archive::Kind Archive::getDefaultKindForHost() {
   Triple HostTriple(sys::getProcessTriple());
-  return HostTriple.isOSDarwin()
+  return TripleUtils::isOSDarwin(HostTriple)
              ? object::Archive::K_DARWIN
              : (HostTriple.isOSAIX() ? object::Archive::K_AIXBIG
                                      : object::Archive::K_GNU);

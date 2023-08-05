@@ -79,7 +79,7 @@ object::Archive::Kind NewArchiveMember::detectKindFromObject() const {
             MemBufferRef, file_magic::bitcode, &Context)) {
       auto &IRObject = cast<object::IRObjectFile>(**ObjOrErr);
       auto TargetTriple = Triple(IRObject.getTargetTriple());
-      return TargetTriple.isOSDarwin()
+      return TripleUtils::isOSDarwin(TargetTriple)
                  ? object::Archive::K_DARWIN
                  : (TargetTriple.isOSAIX() ? object::Archive::K_AIXBIG
                                            : object::Archive::K_GNU);

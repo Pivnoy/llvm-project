@@ -240,7 +240,7 @@ public:
 
   std::unique_ptr<MCObjectTargetWriter>
   createObjectTargetWriter() const override {
-    return createPPCXCOFFObjectWriter(TT.isArch64Bit());
+    return createPPCXCOFFObjectWriter(TripleUtils::isArch64Bit(TT));
   }
 
   std::optional<MCFixupKind> getFixupKind(StringRef Name) const override;

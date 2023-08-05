@@ -15,6 +15,7 @@
 #include "clang/Basic/LangOptions.h"
 #include "clang/Basic/TargetInfo.h"
 #include "llvm/Support/ConvertUTF.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <optional>
 
 using clang::analyze_format_string::ArgType;
@@ -893,7 +894,7 @@ bool FormatSpecifier::hasValidLengthModifier(const TargetInfo &Target,
         case ConversionSpecifier::uArg:
         case ConversionSpecifier::xArg:
         case ConversionSpecifier::XArg:
-          return !Target.getTriple().isOSDarwin() &&
+          return !llvm::TripleUtils::isOSDarwin(Target.getTriple()) &&
                  !Target.getTriple().isOSWindows();
         default:
           return false;

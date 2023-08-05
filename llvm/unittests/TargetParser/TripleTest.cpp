@@ -8,6 +8,7 @@
 
 #include "llvm/TargetParser/Triple.h"
 #include "llvm/Support/VersionTuple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "gtest/gtest.h"
 
 using namespace llvm;
@@ -757,13 +758,13 @@ TEST(TripleTest, ParsedIDs) {
   EXPECT_EQ(Triple::OpenEmbedded, T.getVendor());
   EXPECT_EQ(Triple::Linux, T.getOS());
   EXPECT_EQ(Triple::UnknownEnvironment, T.getEnvironment());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
 
   T = Triple("arm64_32-apple-ios");
   EXPECT_EQ(Triple::aarch64_32, T.getArch());
   EXPECT_EQ(Triple::IOS, T.getOS());
   EXPECT_EQ(Triple::UnknownEnvironment, T.getEnvironment());
-  EXPECT_TRUE(T.isArch32Bit());
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
 
   T = Triple("dxil-unknown-shadermodel-pixel");
   EXPECT_EQ(Triple::dxil, T.getArch());
@@ -1094,174 +1095,174 @@ TEST(TripleTest, MutateName) {
 
 TEST(TripleTest, BitWidthPredicates) {
   Triple T;
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::arm);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::hexagon);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::mips);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::mips64);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::msp430);
-  EXPECT_TRUE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_TRUE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::ppc);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::ppc64);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::x86);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::x86_64);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::amdil);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::amdil64);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::hsail);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::hsail64);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::spir);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::spir64);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::spirv32);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
   EXPECT_TRUE(T.isSPIRV());
 
   T.setArch(Triple::spirv64);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
   EXPECT_TRUE(T.isSPIRV());
 
   T.setArch(Triple::sparc);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::sparcel);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::sparcv9);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::wasm32);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::wasm64);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::avr);
-  EXPECT_TRUE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_TRUE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::lanai);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 
   T.setArch(Triple::riscv32);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
   EXPECT_TRUE(T.isRISCV());
 
   T.setArch(Triple::riscv64);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
   EXPECT_TRUE(T.isRISCV());
 
   T.setArch(Triple::csky);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
   EXPECT_TRUE(T.isCSKY());
 
   T.setArch(Triple::loongarch32);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
   EXPECT_TRUE(T.isLoongArch());
   EXPECT_TRUE(T.isLoongArch32());
 
   T.setArch(Triple::loongarch64);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
   EXPECT_TRUE(T.isLoongArch());
   EXPECT_TRUE(T.isLoongArch64());
 
   T.setArch(Triple::dxil);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
   EXPECT_TRUE(T.isDXIL());
 
   T.setArch(Triple::xtensa);
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
 }
 
 TEST(TripleTest, BitWidthArchVariants) {
@@ -1620,128 +1621,128 @@ TEST(TripleTest, getOSVersion) {
   VersionTuple Version;
 
   T = Triple("i386-apple-darwin9");
-  EXPECT_TRUE(T.isMacOSX());
-  EXPECT_FALSE(T.isiOS());
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_TRUE(TripleUtils::isMacOSX(T));
+  EXPECT_FALSE(TripleUtils::isiOS(T));
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
   T.getMacOSXVersion(Version);
   EXPECT_EQ(VersionTuple(10, 5), Version);
   Version = T.getiOSVersion();
   EXPECT_EQ(VersionTuple(5), Version);
 
   T = Triple("x86_64-apple-darwin9");
-  EXPECT_TRUE(T.isMacOSX());
-  EXPECT_FALSE(T.isiOS());
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_TRUE(TripleUtils::isMacOSX(T));
+  EXPECT_FALSE(TripleUtils::isiOS(T));
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
   T.getMacOSXVersion(Version);
   EXPECT_EQ(VersionTuple(10, 5), Version);
   Version = T.getiOSVersion();
   EXPECT_EQ(VersionTuple(5), Version);
 
   T = Triple("x86_64-apple-macosx");
-  EXPECT_TRUE(T.isMacOSX());
-  EXPECT_FALSE(T.isiOS());
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_TRUE(TripleUtils::isMacOSX(T));
+  EXPECT_FALSE(TripleUtils::isiOS(T));
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
   T.getMacOSXVersion(Version);
   EXPECT_EQ(VersionTuple(10, 4), Version);
   Version = T.getiOSVersion();
   EXPECT_EQ(VersionTuple(5), Version);
 
   T = Triple("x86_64-apple-macosx10.7");
-  EXPECT_TRUE(T.isMacOSX());
-  EXPECT_FALSE(T.isiOS());
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_TRUE(TripleUtils::isMacOSX(T));
+  EXPECT_FALSE(TripleUtils::isiOS(T));
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
   T.getMacOSXVersion(Version);
   EXPECT_EQ(VersionTuple(10, 7), Version);
   Version = T.getiOSVersion();
   EXPECT_EQ(VersionTuple(5), Version);
 
   T = Triple("x86_64-apple-macos11.0");
-  EXPECT_TRUE(T.isMacOSX());
-  EXPECT_FALSE(T.isiOS());
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_TRUE(TripleUtils::isMacOSX(T));
+  EXPECT_FALSE(TripleUtils::isiOS(T));
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
   T.getMacOSXVersion(Version);
   EXPECT_EQ(VersionTuple(11, 0), Version);
 
   T = Triple("arm64-apple-macosx11.5.8");
-  EXPECT_TRUE(T.isMacOSX());
-  EXPECT_FALSE(T.isiOS());
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_FALSE(T.isArch32Bit());
-  EXPECT_TRUE(T.isArch64Bit());
+  EXPECT_TRUE(TripleUtils::isMacOSX(T));
+  EXPECT_FALSE(TripleUtils::isiOS(T));
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch32Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch64Bit(T));
   T.getMacOSXVersion(Version);
   EXPECT_EQ(VersionTuple(11, 5, 8), Version);
 
   // 10.16 forms a valid triple, even though it's not
   // a version of a macOS.
   T = Triple("x86_64-apple-macos10.16");
-  EXPECT_TRUE(T.isMacOSX());
+  EXPECT_TRUE(TripleUtils::isMacOSX(T));
   T.getMacOSXVersion(Version);
   EXPECT_EQ(VersionTuple(10, 16), Version);
 
   T = Triple("x86_64-apple-darwin20");
-  EXPECT_TRUE(T.isMacOSX());
+  EXPECT_TRUE(TripleUtils::isMacOSX(T));
   T.getMacOSXVersion(Version);
   EXPECT_EQ(VersionTuple(11), Version);
 
   // For darwin triples on macOS 11, only compare the major version.
   T = Triple("x86_64-apple-darwin20.2");
-  EXPECT_TRUE(T.isMacOSX());
+  EXPECT_TRUE(TripleUtils::isMacOSX(T));
   T.getMacOSXVersion(Version);
   EXPECT_EQ(VersionTuple(11), Version);
 
   T = Triple("armv7-apple-ios");
-  EXPECT_FALSE(T.isMacOSX());
-  EXPECT_TRUE(T.isiOS());
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isMacOSX(T));
+  EXPECT_TRUE(TripleUtils::isiOS(T));
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
   T.getMacOSXVersion(Version);
   EXPECT_EQ(VersionTuple(10, 4), Version);
   Version = T.getiOSVersion();
   EXPECT_EQ(VersionTuple(5), Version);
 
   T = Triple("armv7-apple-ios7.0");
-  EXPECT_FALSE(T.isMacOSX());
-  EXPECT_TRUE(T.isiOS());
-  EXPECT_FALSE(T.isArch16Bit());
-  EXPECT_TRUE(T.isArch32Bit());
-  EXPECT_FALSE(T.isArch64Bit());
+  EXPECT_FALSE(TripleUtils::isMacOSX(T));
+  EXPECT_TRUE(TripleUtils::isiOS(T));
+  EXPECT_FALSE(TripleUtils::isArch16Bit(T));
+  EXPECT_TRUE(TripleUtils::isArch32Bit(T));
+  EXPECT_FALSE(TripleUtils::isArch64Bit(T));
   T.getMacOSXVersion(Version);
   EXPECT_EQ(VersionTuple(10, 4), Version);
   Version = T.getiOSVersion();
   EXPECT_EQ(VersionTuple(7, 0), Version);
-  EXPECT_FALSE(T.isSimulatorEnvironment());
+  EXPECT_FALSE(TripleUtils::isSimulatorEnvironment(T));
 
   T = Triple("x86_64-apple-ios10.3-simulator");
-  EXPECT_TRUE(T.isiOS());
+  EXPECT_TRUE(TripleUtils::isiOS(T));
   Version = T.getiOSVersion();
   EXPECT_EQ(VersionTuple(10, 3), Version);
-  EXPECT_TRUE(T.isSimulatorEnvironment());
-  EXPECT_FALSE(T.isMacCatalystEnvironment());
+  EXPECT_TRUE(TripleUtils::isSimulatorEnvironment(T));
+  EXPECT_FALSE(TripleUtils::isMacCatalystEnvironment(T));
 
   T = Triple("x86_64-apple-ios13.0-macabi");
-  EXPECT_TRUE(T.isiOS());
+  EXPECT_TRUE(TripleUtils::isiOS(T));
   Version = T.getiOSVersion();
   EXPECT_EQ(VersionTuple(13, 0), Version);
   EXPECT_TRUE(T.getEnvironment() == Triple::MacABI);
-  EXPECT_TRUE(T.isMacCatalystEnvironment());
-  EXPECT_FALSE(T.isSimulatorEnvironment());
+  EXPECT_TRUE(TripleUtils::isMacCatalystEnvironment(T));
+  EXPECT_FALSE(TripleUtils::isSimulatorEnvironment(T));
 
   T = Triple("x86_64-apple-driverkit20.1.0");
-  EXPECT_TRUE(T.isDriverKit());
-  EXPECT_TRUE(T.isOSDarwin());
-  EXPECT_FALSE(T.isMacOSX());
-  EXPECT_FALSE(T.isiOS());
+  EXPECT_TRUE(TripleUtils::isDriverKit(T));
+  EXPECT_TRUE(TripleUtils::isOSDarwin(T));
+  EXPECT_FALSE(TripleUtils::isMacOSX(T));
+  EXPECT_FALSE(TripleUtils::isiOS(T));
   Version = T.getDriverKitVersion();
   EXPECT_EQ(VersionTuple(20, 1), Version);
 
@@ -1790,13 +1791,13 @@ TEST(TripleTest, getEnvironmentVersion) {
 
 TEST(TripleTest, isMacOSVersionLT) {
   Triple T = Triple("x86_64-apple-macos11");
-  EXPECT_TRUE(T.isMacOSXVersionLT(11, 1, 0));
-  EXPECT_FALSE(T.isMacOSXVersionLT(10, 15, 0));
+  EXPECT_TRUE(TripleUtils::isMacOSXVersionLT(T, 11, 1, 0)); 
+  EXPECT_FALSE(TripleUtils::isMacOSXVersionLT(T, 10, 15, 0));
 
   T = Triple("x86_64-apple-darwin20");
-  EXPECT_TRUE(T.isMacOSXVersionLT(11, 1, 0));
-  EXPECT_FALSE(T.isMacOSXVersionLT(11, 0, 0));
-  EXPECT_FALSE(T.isMacOSXVersionLT(10, 15, 0));
+  EXPECT_TRUE(TripleUtils::isMacOSXVersionLT(T, 11, 1, 0));
+  EXPECT_FALSE(TripleUtils::isMacOSXVersionLT(T, 11, 0, 0));
+  EXPECT_FALSE(TripleUtils::isMacOSXVersionLT(T, 10, 15, 0));
 }
 
 TEST(TripleTest, CanonicalizeOSVersion) {
@@ -1845,14 +1846,10 @@ TEST(TripleTest, FileFormat) {
             Triple("wasm32-unknown-unknown-wasm").getObjectFormat());
   EXPECT_EQ(Triple::Wasm,
             Triple("wasm64-unknown-unknown-wasm").getObjectFormat());
-  EXPECT_EQ(Triple::Wasm,
-            Triple("wasm32-wasi-wasm").getObjectFormat());
-  EXPECT_EQ(Triple::Wasm,
-            Triple("wasm64-wasi-wasm").getObjectFormat());
-  EXPECT_EQ(Triple::Wasm,
-            Triple("wasm32-unknown-wasi-wasm").getObjectFormat());
-  EXPECT_EQ(Triple::Wasm,
-            Triple("wasm64-unknown-wasi-wasm").getObjectFormat());
+  EXPECT_EQ(Triple::Wasm, Triple("wasm32-wasi-wasm").getObjectFormat());
+  EXPECT_EQ(Triple::Wasm, Triple("wasm64-wasi-wasm").getObjectFormat());
+  EXPECT_EQ(Triple::Wasm, Triple("wasm32-unknown-wasi-wasm").getObjectFormat());
+  EXPECT_EQ(Triple::Wasm, Triple("wasm64-unknown-wasi-wasm").getObjectFormat());
 
   EXPECT_EQ(Triple::XCOFF, Triple("powerpc-ibm-aix").getObjectFormat());
   EXPECT_EQ(Triple::XCOFF, Triple("powerpc64-ibm-aix").getObjectFormat());

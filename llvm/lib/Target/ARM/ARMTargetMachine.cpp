@@ -207,7 +207,7 @@ static Reloc::Model getEffectiveRelocModel(const Triple &TT,
            "ROPI/RWPI currently only supported for ELF");
 
   // DynamicNoPIC is only used on darwin.
-  if (*RM == Reloc::DynamicNoPIC && !TT.isOSDarwin())
+  if (*RM == Reloc::DynamicNoPIC && !TripleUtils::isOSDarwin(TT))
     return Reloc::Static;
 
   return *RM;
@@ -244,7 +244,7 @@ ARMBaseTargetMachine::ARMBaseTargetMachine(const Target &T, const Triple &TT,
          TargetTriple.getEnvironment() == Triple::MuslEABI ||
          TargetTriple.getEnvironment() == Triple::MuslEABIHF ||
          TargetTriple.getEnvironment() == Triple::OpenHOS) &&
-        !(TargetTriple.isOSWindows() || TargetTriple.isOSDarwin()))
+        !(TargetTriple.isOSWindows() || TripleUtils::isOSDarwin(TargetTriple)))
       this->Options.EABIVersion = EABI::GNU;
     else
       this->Options.EABIVersion = EABI::EABI5;

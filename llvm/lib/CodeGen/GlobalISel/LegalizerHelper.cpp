@@ -35,6 +35,7 @@
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <numeric>
 #include <optional>
 
@@ -7580,7 +7581,7 @@ LegalizerHelper::lowerVectorReduction(MachineInstr &MI) {
 static bool shouldLowerMemFuncForSize(const MachineFunction &MF) {
   // On Darwin, -Os means optimize for size without hurting performance, so
   // only really optimize for size when -Oz (MinSize) is used.
-  if (MF.getTarget().getTargetTriple().isOSDarwin())
+  if (TripleUtils::isOSDarwin(MF.getTarget().getTargetTriple()))
     return MF.getFunction().hasMinSize();
   return MF.getFunction().hasOptSize();
 }

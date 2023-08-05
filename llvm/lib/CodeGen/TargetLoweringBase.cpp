@@ -53,6 +53,7 @@
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "llvm/Transforms/Utils/SizeOpts.h"
 #include <algorithm>
 #include <cassert>
@@ -99,16 +100,16 @@ static cl::opt<bool> DisableStrictNodeMutation("disable-strictnode-mutation",
        cl::init(false), cl::Hidden);
 
 static bool darwinHasSinCos(const Triple &TT) {
-  assert(TT.isOSDarwin() && "should be called with darwin triple");
+  assert(TripleUtils::isOSDarwin(TT) && "should be called with darwin triple");
   // Don't bother with 32 bit x86.
   if (TT.getArch() == Triple::x86)
     return false;
   // Macos < 10.9 has no sincos_stret.
-  if (TT.isMacOSX())
-    return !TT.isMacOSXVersionLT(10, 9) && TT.isArch64Bit();
+  if (TripleUtils::isMacOSX(TT))
+    return !TripleUtils::isMacOSXVersionLT(TT, 10, 9) && TripleUtils::isArch64Bit(TT);
   // iOS < 7.0 has no sincos_stret.
-  if (TT.isiOS())
-    return !TT.isOSVersionLT(7, 0);
+  if (TripleUtils::isiOS(TT))
+    return !TripleUtils::isOSVersionLT(TT, 7, 0);
   // Any other darwin such as WatchOS/TvOS is new enough.
   return true;
 }
@@ -155,7 +156,7 @@ void TargetLoweringBase::InitLibcalls(const Triple &TT) {
   }
 
   // A few names are different on particular architectures or environments.
-  if (TT.isOSDarwin()) {
+  if (TripleUtils::isOSDarwin(TT)) {
     // For f16/f32 conversions, Darwin uses the standard naming scheme, instead
     // of the gnueabi-style __gnu_*_ieee.
     // FIXME: What about other targets?
@@ -166,7 +167,7 @@ void TargetLoweringBase::InitLibcalls(const Triple &TT) {
     switch (TT.getArch()) {
     case Triple::x86:
     case Triple::x86_64:
-      if (TT.isMacOSX() && !TT.isMacOSXVersionLT(10, 6))
+      if (TripleUtils::isMacOSX(TT) && !TripleUtils::isMacOSXVersionLT(TT, 10, 6))
         setLibcallName(RTLIB::BZERO, "__bzero");
       break;
     case Triple::aarch64:
@@ -180,7 +181,7 @@ void TargetLoweringBase::InitLibcalls(const Triple &TT) {
     if (darwinHasSinCos(TT)) {
       setLibcallName(RTLIB::SINCOS_STRET_F32, "__sincosf_stret");
       setLibcallName(RTLIB::SINCOS_STRET_F64, "__sincos_stret");
-      if (TT.isWatchABI()) {
+      if (TripleUtils::isWatchABI(TT)) {
         setLibcallCallingConv(RTLIB::SINCOS_STRET_F32,
                               CallingConv::ARM_AAPCS_VFP);
         setLibcallCallingConv(RTLIB::SINCOS_STRET_F64,
@@ -193,7 +194,7 @@ void TargetLoweringBase::InitLibcalls(const Triple &TT) {
   }
 
   if (TT.isGNUEnvironment() || TT.isOSFuchsia() ||
-      (TT.isAndroid() && !TT.isAndroidVersionLT(9))) {
+      (TT.isAndroid() && !TripleUtils::isAndroidVersionLT(TT, 9))) {
     setLibcallName(RTLIB::SINCOS_F32, "sincosf");
     setLibcallName(RTLIB::SINCOS_F64, "sincos");
     setLibcallName(RTLIB::SINCOS_F80, "sincosl");
@@ -2013,7 +2014,7 @@ void TargetLoweringBase::insertSSPDeclarations(Module &M) const {
     if (M.getDirectAccessExternalData() &&
         !TM.getTargetTriple().isWindowsGNUEnvironment() &&
         !TM.getTargetTriple().isOSFreeBSD() &&
-        !TM.getTargetTriple().isOSDarwin())
+        !TripleUtils::isOSDarwin(TM.getTargetTriple()))
       GV->setDSOLocal(true);
   }
 }

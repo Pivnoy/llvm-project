@@ -18,6 +18,7 @@
 #include "llvm/Support/FileUtilities.h"
 #include "llvm/Support/Program.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <fstream>
 #include <sstream>
 #include <utility>
@@ -650,7 +651,7 @@ Expected<int> CC::ExecuteProgram(const std::string &ProgramFile,
       // For ARM architectures we don't want this flag. bugpoint isn't
       // explicitly told what architecture it is working on, so we get
       // it from cc flags
-      if (TargetTriple.isOSDarwin() && !IsARMArchitecture(CCArgs))
+      if (TripleUtils::isOSDarwin(TargetTriple) && !IsARMArchitecture(CCArgs))
         CCArgs.push_back("-force_cpusubtype_ALL");
     }
   }
@@ -797,7 +798,7 @@ Error CC::MakeSharedObject(const std::string &InputFile, FileType fileType,
   CCArgs.push_back("none");
   if (TargetTriple.getArch() == Triple::sparc)
     CCArgs.push_back("-G"); // Compile a shared library, `-G' for Sparc
-  else if (TargetTriple.isOSDarwin()) {
+  else if (TripleUtils::isOSDarwin(TargetTriple)) {
     // link all source files into a single module in data segment, rather than
     // generating blocks. dynamic_lookup requires that you set
     // MACOSX_DEPLOYMENT_TARGET=10.3 in your env.  FIXME: it would be better for

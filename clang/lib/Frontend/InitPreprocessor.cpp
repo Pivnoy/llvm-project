@@ -1247,7 +1247,7 @@ static void InitializePredefinedMacros(const TargetInfo &TI,
 
   // On Darwin, there are __double_underscored variants of the type
   // nullability qualifiers.
-  if (TI.getTriple().isOSDarwin()) {
+  if (llvm::TripleUtils::isOSDarwin(TI.getTriple())) {
     Builder.defineMacro("__nonnull", "_Nonnull");
     Builder.defineMacro("__null_unspecified", "_Null_unspecified");
     Builder.defineMacro("__nullable", "_Nullable");
@@ -1255,7 +1255,7 @@ static void InitializePredefinedMacros(const TargetInfo &TI,
 
   // Add a macro to differentiate between regular iOS/tvOS/watchOS targets and
   // the corresponding simulator targets.
-  if (TI.getTriple().isOSDarwin() && TI.getTriple().isSimulatorEnvironment())
+  if (llvm::TripleUtils::isOSDarwin(TI.getTriple()) && TI.getTriple().isSimulatorEnvironment())
     Builder.defineMacro("__APPLE_EMBEDDED_SIMULATOR__", "1");
 
   // OpenMP definition

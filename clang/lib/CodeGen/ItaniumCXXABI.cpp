@@ -2654,7 +2654,7 @@ static void emitGlobalDtorWithCXAAtExit(CodeGenFunction &CGF,
   const char *Name = "__cxa_atexit";
   if (TLS) {
     const llvm::Triple &T = CGF.getTarget().getTriple();
-    Name = T.isOSDarwin() ?  "_tlv_atexit" : "__cxa_thread_atexit";
+    Name = llvm::TripleUtils::isOSDarwin(T) ?  "_tlv_atexit" : "__cxa_thread_atexit";
   }
 
   // We're assuming that the destructor function is something we can
@@ -2830,7 +2830,7 @@ static bool isThreadWrapperReplaceable(const VarDecl *VD,
   // Darwin prefers to have references to thread local variables to go through
   // the thread wrapper instead of directly referencing the backing variable.
   return VD->getTLSKind() == VarDecl::TLS_Dynamic &&
-         CGM.getTarget().getTriple().isOSDarwin();
+         llvm::TripleUtils::isOSDarwin(CGM.getTarget().getTriple());
 }
 
 /// Get the appropriate linkage for the wrapper function. This is essentially
@@ -2942,7 +2942,7 @@ void ItaniumCXXABI::EmitThreadLocalInitFuncs(
     CodeGenFunction(CGM).GenerateCXXGlobalInitFunc(
         InitFunc, OrderedInits, ConstantAddress(Guard, CGM.Int8Ty, GuardAlign));
     // On Darwin platforms, use CXX_FAST_TLS calling convention.
-    if (CGM.getTarget().getTriple().isOSDarwin()) {
+    if (llvm::TripleUtils::isOSDarwin(CGM.getTarget().getTriple())) {
       InitFunc->setCallingConv(llvm::CallingConv::CXX_FAST_TLS);
       InitFunc->addFnAttr(llvm::Attribute::NoUnwind);
     }

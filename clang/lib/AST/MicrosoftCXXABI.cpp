@@ -315,14 +315,14 @@ CXXABI::MemberPointerInfo MicrosoftCXXABI::getMemberPointerInfo(
   // When MSVC does x86_32 record layout, it aligns aggregate member pointers to
   // 8 bytes.  However, __alignof usually returns 4 for data memptrs and 8 for
   // function memptrs.
-  if (Ptrs + Ints > 1 && Target.getTriple().isArch32Bit())
+  if (Ptrs + Ints > 1 && llvm::TripleUtils::isArch32Bit(Target.getTriple()))
     MPI.Align = 64;
   else if (Ptrs)
     MPI.Align = Target.getPointerAlign(LangAS::Default);
   else
     MPI.Align = Target.getIntAlign();
 
-  if (Target.getTriple().isArch64Bit()) {
+  if (llvm::TripleUtils::isArch64Bit(Target.getTriple())) {
     MPI.Width = llvm::alignTo(MPI.Width, MPI.Align);
     MPI.HasPadding = MPI.Width != (Ptrs * PtrSize + Ints * IntSize);
   }

@@ -410,7 +410,7 @@ TEST_F(MCJITCAPITest, stackmap_creates_compact_unwind_on_darwin) {
   // sections to emit. The JIT client should have runtime control over this.
   EXPECT_TRUE(
     Triple(HostTriple).getOS() != Triple::Darwin ||
-    Triple(HostTriple).isMacOSXVersionLT(10, 7) ||
+    TripleUtils::isMacOSXVersionLT(Triple(HostTriple), 10, 7) ||
     didAllocateCompactUnwindSection);
 }
 

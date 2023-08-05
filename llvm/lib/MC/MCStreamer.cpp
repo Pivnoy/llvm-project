@@ -35,6 +35,7 @@
 #include "llvm/Support/LEB128.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
@@ -1279,13 +1280,13 @@ targetVersionOrMinimumSupportedOSVersion(const Triple &Target,
 
 static MCVersionMinType
 getMachoVersionMinLoadCommandType(const Triple &Target) {
-  assert(Target.isOSDarwin() && "expected a darwin OS");
+  assert(TripleUtils::isOSDarwin(Target) && "expected a darwin OS");
   switch (Target.getOS()) {
   case Triple::MacOSX:
   case Triple::Darwin:
     return MCVM_OSXVersionMin;
   case Triple::IOS:
-    assert(!Target.isMacCatalystEnvironment() &&
+    assert(!TripleUtils::isMacCatalystEnvironment(Target) &&
            "mac Catalyst should use LC_BUILD_VERSION");
     return MCVM_IOSVersionMin;
   case Triple::TvOS:
@@ -1299,14 +1300,14 @@ getMachoVersionMinLoadCommandType(const Triple &Target) {
 }
 
 static VersionTuple getMachoBuildVersionSupportedOS(const Triple &Target) {
-  assert(Target.isOSDarwin() && "expected a darwin OS");
+  assert(TripleUtils::isOSDarwin(Target) && "expected a darwin OS");
   switch (Target.getOS()) {
   case Triple::MacOSX:
   case Triple::Darwin:
     return VersionTuple(10, 14);
   case Triple::IOS:
     // Mac Catalyst always uses the build version load command.
-    if (Target.isMacCatalystEnvironment())
+    if (TripleUtils::isMacCatalystEnvironment(Target))
       return VersionTuple();
     [[fallthrough]];
   case Triple::TvOS:
@@ -1324,21 +1325,21 @@ static VersionTuple getMachoBuildVersionSupportedOS(const Triple &Target) {
 
 static MachO::PlatformType
 getMachoBuildVersionPlatformType(const Triple &Target) {
-  assert(Target.isOSDarwin() && "expected a darwin OS");
+  assert(TripleUtils::isOSDarwin(Target) && "expected a darwin OS");
   switch (Target.getOS()) {
   case Triple::MacOSX:
   case Triple::Darwin:
     return MachO::PLATFORM_MACOS;
   case Triple::IOS:
-    if (Target.isMacCatalystEnvironment())
+    if (TripleUtils::isMacCatalystEnvironment(Target))
       return MachO::PLATFORM_MACCATALYST;
-    return Target.isSimulatorEnvironment() ? MachO::PLATFORM_IOSSIMULATOR
+    return TripleUtils::isSimulatorEnvironment(Target) ? MachO::PLATFORM_IOSSIMULATOR
                                            : MachO::PLATFORM_IOS;
   case Triple::TvOS:
-    return Target.isSimulatorEnvironment() ? MachO::PLATFORM_TVOSSIMULATOR
+    return TripleUtils::isSimulatorEnvironment(Target) ? MachO::PLATFORM_TVOSSIMULATOR
                                            : MachO::PLATFORM_TVOS;
   case Triple::WatchOS:
-    return Target.isSimulatorEnvironment() ? MachO::PLATFORM_WATCHOSSIMULATOR
+    return TripleUtils::isSimulatorEnvironment(Target) ? MachO::PLATFORM_WATCHOSSIMULATOR
                                            : MachO::PLATFORM_WATCHOS;
   case Triple::DriverKit:
     return MachO::PLATFORM_DRIVERKIT;
@@ -1352,7 +1353,7 @@ void MCStreamer::emitVersionForTarget(
     const Triple &Target, const VersionTuple &SDKVersion,
     const Triple *DarwinTargetVariantTriple,
     const VersionTuple &DarwinTargetVariantSDKVersion) {
-  if (!Target.isOSBinFormatMachO() || !Target.isOSDarwin())
+  if (!Target.isOSBinFormatMachO() || !TripleUtils::isOSDarwin(Target))
     return;
   // Do we even know the version?
   if (Target.getOSMajorVersion() == 0)
@@ -1384,8 +1385,8 @@ void MCStreamer::emitVersionForTarget(
   bool ShouldEmitBuildVersion = false;
   if (BuildVersionOSVersion.empty() ||
       LinkedTargetVersion >= BuildVersionOSVersion) {
-    if (Target.isMacCatalystEnvironment() && DarwinTargetVariantTriple &&
-        DarwinTargetVariantTriple->isMacOSX()) {
+    if (llvm::TripleUtils::isMacCatalystEnvironment(Target) && DarwinTargetVariantTriple &&
+        llvm::TripleUtils::isMacOSX(*DarwinTargetVariantTriple)) {
       emitVersionForTarget(*DarwinTargetVariantTriple,
                            DarwinTargetVariantSDKVersion,
                            /*DarwinTargetVariantTriple=*/nullptr,
@@ -1405,7 +1406,7 @@ void MCStreamer::emitVersionForTarget(
   }
 
   if (const Triple *TVT = DarwinTargetVariantTriple) {
-    if (Target.isMacOSX() && TVT->isMacCatalystEnvironment()) {
+    if (llvm::TripleUtils::isMacOSX(Target) && TripleUtils::isMacCatalystEnvironment(*TVT)) {
       auto TVLinkedTargetVersion =
           targetVersionOrMinimumSupportedOSVersion(*TVT, TVT->getiOSVersion());
       emitDarwinTargetVariantBuildVersion(

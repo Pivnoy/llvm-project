@@ -37,6 +37,7 @@
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/TargetParser/ARMTargetParser.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 using namespace llvm;
 
@@ -230,7 +231,7 @@ void ARMSubtarget::initSubtargetFeatures(StringRef CPU, StringRef FS) {
 
   SupportsTailCall = !isThumb1Only() || hasV8MBaselineOps();
 
-  if (isTargetMachO() && isTargetIOS() && getTargetTriple().isOSVersionLT(5, 0))
+  if (isTargetMachO() && isTargetIOS() && TripleUtils::isOSVersionLT(getTargetTriple(), 5, 0))
     SupportsTailCall = false;
 
   switch (IT) {

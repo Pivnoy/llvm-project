@@ -79,7 +79,7 @@ createRISCVMCObjectFileInfo(MCContext &Ctx, bool PIC,
 static MCSubtargetInfo *createRISCVMCSubtargetInfo(const Triple &TT,
                                                    StringRef CPU, StringRef FS) {
   if (CPU.empty() || CPU == "generic")
-    CPU = TT.isArch64Bit() ? "generic-rv64" : "generic-rv32";
+    CPU = TripleUtils::isArch64Bit(TT) ? "generic-rv64" : "generic-rv32";
 
   return createRISCVMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
 }

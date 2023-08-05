@@ -241,7 +241,7 @@ void DwarfStreamer::emitPaperTrailWarningsDie(DIE &Die) {
   Asm.emitInt32(11 + Die.getSize() - 4);
   Asm.emitInt16(2);
   Asm.emitInt32(0);
-  Asm.emitInt8(MC->getTargetTriple().isArch64Bit() ? 8 : 4);
+  Asm.emitInt8(TripleUtils::isArch64Bit(MC->getTargetTriple()) ? 8 : 4);
   DebugInfoSectionSize += 11;
   emitDIE(Die);
 }

@@ -58,6 +58,7 @@
 #include "llvm/TargetParser/Host.h"
 #include "llvm/TargetParser/LoongArchTargetParser.h"
 #include "llvm/TargetParser/RISCVTargetParser.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <cctype>
 
 using namespace clang::driver;
@@ -306,10 +307,10 @@ shouldUseExceptionTablesForObjCExceptions(const ObjCRuntime &runtime,
   if (runtime.isNonFragile())
     return true;
 
-  if (!Triple.isMacOSX())
+  if (!llvm::TripleUtils::isMacOSX(Triple))
     return false;
 
-  return (!Triple.isMacOSXVersionLT(10, 5) &&
+  return (!llvm::TripleUtils::isMacOSXVersionLT(Triple, 10, 5) &&
           (Triple.getArch() == llvm::Triple::x86_64 ||
            Triple.getArch() == llvm::Triple::arm));
 }
@@ -391,7 +392,7 @@ static bool addExceptionArgs(const ArgList &Args, types::ID InputType,
 static bool ShouldEnableAutolink(const ArgList &Args, const ToolChain &TC,
                                  const JobAction &JA) {
   bool Default = true;
-  if (TC.getTriple().isOSDarwin()) {
+  if (llvm::TripleUtils::isOSDarwin(TC.getTriple())) {
     // The native darwin assembler doesn't support the linker_option directives,
     // so we disable them if we think the .s file will be passed to it.
     Default = TC.useIntegratedAs();
@@ -412,7 +413,7 @@ static bool mustUseNonLeafFramePointerForTarget(const llvm::Triple &Triple) {
   case llvm::Triple::thumb:
     // ARM Darwin targets require a frame pointer to be always present to aid
     // offline debugging via backtraces.
-    return Triple.isOSDarwin();
+    return llvm::TripleUtils::isOSDarwin(Triple);
   }
 }
 
@@ -1416,13 +1417,13 @@ static bool isSignedCharDefault(const llvm::Triple &Triple) {
   case llvm::Triple::armeb:
   case llvm::Triple::thumb:
   case llvm::Triple::thumbeb:
-    if (Triple.isOSDarwin() || Triple.isOSWindows())
+    if (llvm::TripleUtils::isOSDarwin(Triple) || Triple.isOSWindows())
       return true;
     return false;
 
   case llvm::Triple::ppc:
   case llvm::Triple::ppc64:
-    if (Triple.isOSDarwin())
+    if (llvm::TripleUtils::isOSDarwin(Triple))
       return true;
     return false;
 
@@ -1441,7 +1442,7 @@ static bool hasMultipleInvocations(const llvm::Triple &Triple,
                                    const ArgList &Args) {
   // Supported only on Darwin where we invoke the compiler multiple times
   // followed by an invocation to lipo.
-  if (!Triple.isOSDarwin())
+  if (!llvm::TripleUtils::isOSDarwin(Triple))
     return false;
   // If more than one "-arch <arch>" is specified, we're targeting multiple
   // architectures resulting in a fat binary.
@@ -1479,7 +1480,7 @@ static void renderRemarksOptions(const ArgList &Args, ArgStringList &CmdArgs,
     CmdArgs.push_back(A->getValue());
   } else {
     bool hasMultipleArchs =
-        Triple.isOSDarwin() && // Only supported on Darwin platforms.
+        llvm::TripleUtils::isOSDarwin(Triple) && // Only supported on Darwin platforms.
         Args.getAllArgValues(options::OPT_arch).size() > 1;
 
     SmallString<128> F;
@@ -1489,7 +1490,7 @@ static void renderRemarksOptions(const ArgList &Args, ArgStringList &CmdArgs,
         F = FinalOutput->getValue();
     } else {
       if (Format != "yaml" && // For YAML, keep the original behavior.
-          Triple.isOSDarwin() && // Enable this only on darwin, since it's the only platform supporting .dSYM bundles.
+          llvm::TripleUtils::isOSDarwin(Triple) && // Enable this only on darwin, since it's the only platform supporting .dSYM bundles.
           Output.isFilename())
         F = Output.getFilename();
     }
@@ -1772,7 +1773,7 @@ void RenderAArch64ABI(const llvm::Triple &Triple, const ArgList &Args,
   const char *ABIName = nullptr;
   if (Arg *A = Args.getLastArg(options::OPT_mabi_EQ))
     ABIName = A->getValue();
-  else if (Triple.isOSDarwin())
+  else if (llvm::TripleUtils::isOSDarwin(Triple))
     ABIName = "darwinpcs";
   else
     ABIName = "aapcs";
@@ -3265,7 +3266,7 @@ static void RenderAnalyzerOptions(const ArgList &Args, ArgStringList &CmdArgs,
       CmdArgs.push_back("-analyzer-disable-checker=unix.Vfork");
     }
 
-    if (Triple.isOSDarwin()) {
+    if (llvm::TripleUtils::isOSDarwin(Triple)) {
       CmdArgs.push_back("-analyzer-checker=osx");
       CmdArgs.push_back(
           "-analyzer-checker=security.insecureAPI.decodeValueOfObjCType");
@@ -3976,7 +3977,7 @@ static void RenderObjCOptions(const ToolChain &TC, const Driver &D,
 
   // When ObjectiveC legacy runtime is in effect on MacOSX, turn on the option
   // to do Array/Dictionary subscripting by default.
-  if (Arch == llvm::Triple::x86 && T.isMacOSX() &&
+  if (Arch == llvm::Triple::x86 && llvm::TripleUtils::isMacOSX(T) &&
       Runtime.getKind() == ObjCRuntime::FragileMacOSX && Runtime.isNeXTFamily())
     CmdArgs.push_back("-fobjc-subscripting-legacy-runtime");
 
@@ -4191,7 +4192,7 @@ static void renderDwarfFormat(const Driver &D, const llvm::Triple &T,
     if (DwarfVersion < 3)
       D.Diag(diag::err_drv_argument_only_allowed_with)
           << DwarfFormatArg->getAsString(Args) << "DWARFv3 or greater";
-    else if (!T.isArch64Bit())
+    else if (!llvm::TripleUtils::isArch64Bit(T))
       D.Diag(diag::err_drv_argument_only_allowed_with)
           << DwarfFormatArg->getAsString(Args) << "64 bit architecture";
     else if (!T.isOSBinFormatELF())
@@ -5580,12 +5581,12 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   // Enable -mconstructor-aliases except on darwin, where we have to work around
   // a linker bug (see <rdar://problem/7651567>), and CUDA device code, where
   // aliases aren't supported.
-  if (!RawTriple.isOSDarwin() && !RawTriple.isNVPTX())
+  if (!llvm::TripleUtils::isOSDarwin(RawTriple) && !RawTriple.isNVPTX())
     CmdArgs.push_back("-mconstructor-aliases");
 
   // Darwin's kernel doesn't support guard variables; just die if we
   // try to use them.
-  if (KernelOrKext && RawTriple.isOSDarwin())
+  if (KernelOrKext && llvm::TripleUtils::isOSDarwin(RawTriple))
     CmdArgs.push_back("-fforbid-guard-variables");
 
   if (Args.hasFlag(options::OPT_mms_bitfields, options::OPT_mno_ms_bitfields,
@@ -5753,7 +5754,7 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   // ignore.
   if (!Args.hasArg(options::OPT_fallow_unsupported)) {
     Arg *Unsupported;
-    if (types::isCXX(InputType) && RawTriple.isOSDarwin() &&
+    if (types::isCXX(InputType) && llvm::TripleUtils::isOSDarwin(RawTriple) &&
         TC.getArch() == llvm::Triple::x86) {
       if ((Unsupported = Args.getLastArg(options::OPT_fapple_kext)) ||
           (Unsupported = Args.getLastArg(options::OPT_mkernel)))
@@ -6666,7 +6667,7 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
 
   if (Args.hasFlag(options::OPT_fregister_global_dtors_with_atexit,
                    options::OPT_fno_register_global_dtors_with_atexit,
-                   RawTriple.isOSDarwin() && !KernelOrKext))
+                   llvm::TripleUtils::isOSDarwin(RawTriple) && !KernelOrKext))
     CmdArgs.push_back("-fregister-global-dtors-with-atexit");
 
   Args.addOptInFlag(CmdArgs, options::OPT_fuse_line_directives,
@@ -6946,7 +6947,7 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
       MaxTypeAlignStr += A->getValue();
       CmdArgs.push_back(Args.MakeArgString(MaxTypeAlignStr));
     }
-  } else if (RawTriple.isOSDarwin()) {
+  } else if (llvm::TripleUtils::isOSDarwin(RawTriple)) {
     if (!SkipMaxTypeAlign) {
       std::string MaxTypeAlignStr = "-fmax-type-align=16";
       CmdArgs.push_back(Args.MakeArgString(MaxTypeAlignStr));
@@ -7711,7 +7712,7 @@ ObjCRuntime Clang::AddObjCRuntimeArgs(const ArgList &args,
     // -fnext-runtime
   } else if (runtimeArg->getOption().matches(options::OPT_fnext_runtime)) {
     // On Darwin, make this use the default behavior for the toolchain.
-    if (getToolChain().getTriple().isOSDarwin()) {
+    if (llvm::TripleUtils::isOSDarwin(getToolChain().getTriple())) {
       runtime = getToolChain().getDefaultObjCRuntime(isNonFragile);
 
       // Otherwise, build for a generic macosx port.

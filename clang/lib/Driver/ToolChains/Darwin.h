@@ -481,7 +481,7 @@ public:
   /// specifed version instead.
   bool isMacosxVersionLT(unsigned V0, unsigned V1 = 0, unsigned V2 = 0) const {
     assert(isTargetMacOSBased() &&
-           (getTriple().isMacOSX() || getTriple().isMacCatalystEnvironment()) &&
+           (llvm::TripleUtils::isMacOSX(getTriple()) || getTriple().isMacCatalystEnvironment()) &&
            "Unexpected call for non OS X target!");
     // The effective triple might not be initialized yet, so construct a
     // pseudo-effective triple to get the minimum supported OS version.

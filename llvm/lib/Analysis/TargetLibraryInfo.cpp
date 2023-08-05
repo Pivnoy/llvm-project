@@ -15,6 +15,7 @@
 #include "llvm/InitializePasses.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 using namespace llvm;
 
 static cl::opt<TargetLibraryInfoImpl::VectorLibrary> ClVectorLibrary(
@@ -79,17 +80,17 @@ static_assert(sizeof Signatures / sizeof *Signatures == LibFunc::NumLibFuncs,
 
 static bool hasSinCosPiStret(const Triple &T) {
   // Only Darwin variants have _stret versions of combined trig functions.
-  if (!T.isOSDarwin())
+  if (!TripleUtils::isOSDarwin(T))
     return false;
 
   // The ABI is rather complicated on x86, so don't do anything special there.
   if (T.getArch() == Triple::x86)
     return false;
 
-  if (T.isMacOSX() && T.isMacOSXVersionLT(10, 9))
+  if (TripleUtils::isMacOSX(T) && TripleUtils::isMacOSXVersionLT(T, 10, 9))
     return false;
 
-  if (T.isiOS() && T.isOSVersionLT(7, 0))
+  if (TripleUtils::isiOS(T) && TripleUtils::isOSVersionLT(T, 7, 0))
     return false;
 
   return true;
@@ -118,7 +119,7 @@ static bool isCallingConvCCompatible(CallingConv::ID CC, StringRef TT,
 
     // The iOS ABI diverges from the standard in some cases, so for now don't
     // try to simplify those calls.
-    if (Triple(TT).isiOS())
+    if (TripleUtils::isiOS(Triple(TT)))
       return false;
 
     if (!FuncTy->getReturnType()->isPointerTy() &&
@@ -184,7 +185,7 @@ static void initialize(TargetLibraryInfoImpl &TLI, const Triple &T,
   // Let's assume by default that the size of int is 32 bits, unless the target
   // is a 16-bit architecture because then it most likely is 16 bits. If that
   // isn't true for a target those defaults should be overridden below.
-  TLI.setIntSize(T.isArch16Bit() ? 16 : 32);
+  TLI.setIntSize(TripleUtils::isArch16Bit(T) ? 16 : 32);
 
   // There is really no runtime library on AMDGPU, apart from
   // __kmpc_alloc/free_shared.
@@ -197,25 +198,25 @@ static void initialize(TargetLibraryInfoImpl &TLI, const Triple &T,
 
   // memset_pattern{4,8,16} is only available on iOS 3.0 and Mac OS X 10.5 and
   // later. All versions of watchOS support it.
-  if (T.isMacOSX()) {
+  if (TripleUtils::isMacOSX(T)) {
     // available IO unlocked variants on Mac OS X
     TLI.setAvailable(LibFunc_getc_unlocked);
     TLI.setAvailable(LibFunc_getchar_unlocked);
     TLI.setAvailable(LibFunc_putc_unlocked);
     TLI.setAvailable(LibFunc_putchar_unlocked);
 
-    if (T.isMacOSXVersionLT(10, 5)) {
+    if (TripleUtils::isMacOSXVersionLT(T, 10, 5)) {
       TLI.setUnavailable(LibFunc_memset_pattern4);
       TLI.setUnavailable(LibFunc_memset_pattern8);
       TLI.setUnavailable(LibFunc_memset_pattern16);
     }
-  } else if (T.isiOS()) {
-    if (T.isOSVersionLT(3, 0)) {
+  } else if (TripleUtils::isiOS(T)) {
+    if (TripleUtils::isOSVersionLT(T, 3, 0)) {
       TLI.setUnavailable(LibFunc_memset_pattern4);
       TLI.setUnavailable(LibFunc_memset_pattern8);
       TLI.setUnavailable(LibFunc_memset_pattern16);
     }
-  } else if (!T.isWatchOS()) {
+  } else if (!TripleUtils::isWatchOS(T)) {
     TLI.setUnavailable(LibFunc_memset_pattern4);
     TLI.setUnavailable(LibFunc_memset_pattern8);
     TLI.setUnavailable(LibFunc_memset_pattern16);
@@ -233,8 +234,8 @@ static void initialize(TargetLibraryInfoImpl &TLI, const Triple &T,
   if (!hasBcmp(T))
     TLI.setUnavailable(LibFunc_bcmp);
 
-  if (T.isMacOSX() && T.getArch() == Triple::x86 &&
-      !T.isMacOSXVersionLT(10, 7)) {
+  if (TripleUtils::isMacOSX(T) && T.getArch() == Triple::x86 &&
+      !TripleUtils::isMacOSXVersionLT(T, 10, 7)) {
     // x86-32 OSX has a scheme where fwrite and fputs (and some other functions
     // we don't care about) have two versions; on recent OSX, the one we want
     // has a $UNIX2003 suffix. The two implementations are identical except
@@ -524,7 +525,7 @@ static void initialize(TargetLibraryInfoImpl &TLI, const Triple &T,
     // and their names are __exp10 and __exp10f. exp10l is not available on
     // OS X or iOS.
     TLI.setUnavailable(LibFunc_exp10l);
-    if (T.isMacOSXVersionLT(10, 9)) {
+    if (TripleUtils::isMacOSXVersionLT(T, 10, 9)) {
       TLI.setUnavailable(LibFunc_exp10);
       TLI.setUnavailable(LibFunc_exp10f);
     } else {
@@ -536,8 +537,8 @@ static void initialize(TargetLibraryInfoImpl &TLI, const Triple &T,
   case Triple::TvOS:
   case Triple::WatchOS:
     TLI.setUnavailable(LibFunc_exp10l);
-    if (!T.isWatchOS() &&
-        (T.isOSVersionLT(7, 0) || (T.isOSVersionLT(9, 0) && T.isX86()))) {
+    if (!TripleUtils::isWatchOS(T) &&
+        (TripleUtils::isOSVersionLT(T, 7, 0) || (TripleUtils::isOSVersionLT(T, 9, 0) && T.isX86()))) {
       TLI.setUnavailable(LibFunc_exp10);
       TLI.setUnavailable(LibFunc_exp10f);
     } else {
@@ -678,7 +679,7 @@ static void initialize(TargetLibraryInfoImpl &TLI, const Triple &T,
   }
 
   if ((T.isOSLinux() && T.isGNUEnvironment()) ||
-      (T.isAndroid() && !T.isAndroidVersionLT(28))) {
+      (T.isAndroid() && !TripleUtils::isAndroidVersionLT(T, 28))) {
     // available IO unlocked variants on GNU/Linux and Android P or later
     TLI.setAvailable(LibFunc_getc_unlocked);
     TLI.setAvailable(LibFunc_getchar_unlocked);
@@ -692,7 +693,7 @@ static void initialize(TargetLibraryInfoImpl &TLI, const Triple &T,
     TLI.setAvailable(LibFunc_fgets_unlocked);
   }
 
-  if (T.isAndroid() && T.isAndroidVersionLT(21)) {
+  if (T.isAndroid() && TripleUtils::isAndroidVersionLT(T, 21)) {
     TLI.setUnavailable(LibFunc_stpcpy);
     TLI.setUnavailable(LibFunc_stpncpy);
   }

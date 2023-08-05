@@ -55,6 +55,7 @@
 #include "llvm/Support/SMLoc.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <algorithm>
 #include <cassert>
 #include <cctype>
@@ -6433,7 +6434,7 @@ bool parseAssignmentExpression(StringRef Name, bool allow_redef,
 MCAsmParser *llvm::createMCAsmParser(SourceMgr &SM, MCContext &C,
                                      MCStreamer &Out, const MCAsmInfo &MAI,
                                      unsigned CB) {
-  if (C.getTargetTriple().isSystemZ() && C.getTargetTriple().isOSzOS())
+  if (C.getTargetTriple().isSystemZ() && llvm::TripleUtils::isOSzOS(C.getTargetTriple()))
     return new HLASMAsmParser(SM, C, Out, MAI, CB);
 
   return new AsmParser(SM, C, Out, MAI, CB);

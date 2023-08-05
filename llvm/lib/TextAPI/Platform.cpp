@@ -14,6 +14,7 @@
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/StringSwitch.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 namespace llvm {
 namespace MachO {
@@ -38,16 +39,16 @@ PlatformType mapToPlatformType(const Triple &Target) {
   case Triple::MacOSX:
     return PLATFORM_MACOS;
   case Triple::IOS:
-    if (Target.isSimulatorEnvironment())
+    if (TripleUtils::isSimulatorEnvironment(Target))
       return PLATFORM_IOSSIMULATOR;
     if (Target.getEnvironment() == Triple::MacABI)
       return PLATFORM_MACCATALYST;
     return PLATFORM_IOS;
   case Triple::TvOS:
-    return Target.isSimulatorEnvironment() ? PLATFORM_TVOSSIMULATOR
+    return TripleUtils::isSimulatorEnvironment(Target) ? PLATFORM_TVOSSIMULATOR
                                            : PLATFORM_TVOS;
   case Triple::WatchOS:
-    return Target.isSimulatorEnvironment() ? PLATFORM_WATCHOSSIMULATOR
+    return TripleUtils::isSimulatorEnvironment(Target) ? PLATFORM_WATCHOSSIMULATOR
                                            : PLATFORM_WATCHOS;
     // TODO: add bridgeOS & driverKit once in llvm::Triple
   }

@@ -54,6 +54,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/TargetParser/SubtargetFeature.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "llvm/Transforms/IPO/FunctionAttrs.h"
 #include "llvm/Transforms/IPO/FunctionImport.h"
 #include "llvm/Transforms/IPO/Internalize.h"
@@ -540,7 +541,7 @@ static void initTMBuilder(TargetMachineBuilder &TMBuilder,
                           const Triple &TheTriple) {
   // Set a default CPU for Darwin triples (copied from LTOCodeGenerator).
   // FIXME this looks pretty terrible...
-  if (TMBuilder.MCpu.empty() && TheTriple.isOSDarwin()) {
+  if (TMBuilder.MCpu.empty() && TripleUtils::isOSDarwin(TheTriple)) {
     if (TheTriple.getArch() == llvm::Triple::x86_64)
       TMBuilder.MCpu = "core2";
     else if (TheTriple.getArch() == llvm::Triple::x86)
@@ -571,7 +572,7 @@ void ThinLTOCodeGenerator::addModule(StringRef Identifier, StringRef Data) {
     if (!TMBuilder.TheTriple.isCompatibleWith(TheTriple))
       report_fatal_error("ThinLTO modules with incompatible triples not "
                          "supported");
-    initTMBuilder(TMBuilder, Triple(TMBuilder.TheTriple.merge(TheTriple)));
+    initTMBuilder(TMBuilder, Triple(TripleUtils::merge(TMBuilder.TheTriple , TheTriple)));
   }
 
   Modules.emplace_back(std::move(*InputOrError));

@@ -14,6 +14,7 @@
 #include "llvm/Option/ArgList.h"
 #include "llvm/TargetParser/ARMTargetParser.h"
 #include "llvm/TargetParser/Host.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 using namespace clang::driver;
 using namespace clang::driver::tools;
@@ -829,7 +830,7 @@ fp16_fml_fallthrough:
                                options::OPT_mno_long_calls)) {
     if (A->getOption().matches(options::OPT_mlong_calls))
       Features.push_back("+long-calls");
-  } else if (KernelOrKext && (!Triple.isiOS() || Triple.isOSVersionLT(6)) &&
+  } else if (KernelOrKext && (!llvm::TripleUtils::isiOS(Triple) || llvm::TripleUtils::isOSVersionLT(Triple, 6)) &&
              !Triple.isWatchOS()) {
       Features.push_back("+long-calls");
   }
@@ -885,7 +886,7 @@ fp16_fml_fallthrough:
     //
     // The above behavior is consistent with GCC.
     int VersionNum = getARMSubArchVersionNumber(Triple);
-    if (Triple.isOSDarwin() || Triple.isOSNetBSD()) {
+    if (llvm::TripleUtils::isOSDarwin(Triple) || Triple.isOSNetBSD()) {
       if (VersionNum < 6 ||
           Triple.getSubArch() == llvm::Triple::SubArchType::ARMSubArch_v6m)
         Features.push_back("+strict-align");

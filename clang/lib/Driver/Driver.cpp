@@ -95,6 +95,7 @@
 #include "llvm/Support/VirtualFileSystem.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Host.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <cstdlib> // ::getenv
 #include <map>
 #include <memory>
@@ -132,7 +133,7 @@ static std::optional<llvm::Triple>
 getNVIDIAOffloadTargetTriple(const Driver &D, const ArgList &Args,
                              const llvm::Triple &HostTriple) {
   if (!Args.hasArg(options::OPT_offload_EQ)) {
-    return llvm::Triple(HostTriple.isArch64Bit() ? "nvptx64-nvidia-cuda"
+    return llvm::Triple(llvm::TripleUtils::isArch64Bit(HostTriple) ? "nvptx64-nvidia-cuda"
                                                  : "nvptx-nvidia-cuda");
   }
   auto TT = getOffloadTargetTriple(D, Args);
@@ -1530,7 +1531,7 @@ static void printArgList(raw_ostream &OS, const llvm::opt::ArgList &Args) {
 bool Driver::getCrashDiagnosticFile(StringRef ReproCrashFilename,
                                     SmallString<128> &CrashDiagDir) {
   using namespace llvm::sys;
-  assert(llvm::Triple(llvm::sys::getProcessTriple()).isOSDarwin() &&
+  assert(llvm::TripleUtils::isOSDarwin(llvm::Triple(llvm::sys::getProcessTriple())) &&
          "Only knows about .crash files on Darwin");
 
   // The .crash file can be found on at ~/Library/Logs/DiagnosticReports/
@@ -1834,7 +1835,7 @@ void Driver::generateCompilationDiagnostics(
   }
 
   // On darwin, provide information about the .crash diagnostic report.
-  if (llvm::Triple(llvm::sys::getProcessTriple()).isOSDarwin()) {
+  if (llvm::TripleUtils::isOSDarwin(llvm::Triple(llvm::sys::getProcessTriple()))) {
     SmallString<128> CrashDiagDir;
     if (getCrashDiagnosticFile(ReproCrashFilename, CrashDiagDir)) {
       Diag(clang::diag::note_drv_command_failed_diag_msg)
@@ -5846,7 +5847,7 @@ const char *Driver::GetNamedOutputPath(Compilation &C, const JobAction &JA,
     bool NeedUniqueDirectory =
         (JA.getOffloadingDeviceKind() == Action::OFK_None ||
          JA.getOffloadingDeviceKind() == Action::OFK_Host) &&
-        Triple.isOSDarwin();
+        llvm::TripleUtils::isOSDarwin(Triple);
     return CreateTempFile(C, Split.first, Suffix, MultipleArchs, BoundArch,
                           NeedUniqueDirectory);
   }

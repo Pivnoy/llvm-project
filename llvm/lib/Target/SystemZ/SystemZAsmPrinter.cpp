@@ -27,6 +27,7 @@
 #include "llvm/MC/MCSectionELF.h"
 #include "llvm/MC/MCStreamer.h"
 #include "llvm/MC/TargetRegistry.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 using namespace llvm;
 
@@ -950,7 +951,7 @@ bool SystemZAsmPrinter::PrintAsmMemoryOperand(const MachineInstr *MI,
 
 void SystemZAsmPrinter::emitEndOfAsmFile(Module &M) {
   auto TT = OutContext.getTargetTriple();
-  if (TT.isOSzOS()) {
+  if (TripleUtils::isOSzOS(TT)) {
     emitADASection();
   }
   emitAttributes(M);
@@ -1026,7 +1027,7 @@ void SystemZAsmPrinter::emitADASection() {
 }
 
 void SystemZAsmPrinter::emitFunctionBodyEnd() {
-  if (TM.getTargetTriple().isOSzOS()) {
+  if (TripleUtils::isOSzOS(TM.getTargetTriple())) {
     // Emit symbol for the end of function if the z/OS target streamer
     // is used. This is needed to calculate the size of the function.
     MCSymbol *FnEndSym = createTempSymbol("func_end");
@@ -1260,7 +1261,7 @@ void SystemZAsmPrinter::emitPPA1(MCSymbol *FnEndSym) {
 void SystemZAsmPrinter::emitFunctionEntryLabel() {
   const SystemZSubtarget &Subtarget = MF->getSubtarget<SystemZSubtarget>();
 
-  if (Subtarget.getTargetTriple().isOSzOS()) {
+  if (TripleUtils::isOSzOS(Subtarget.getTargetTriple())) {
     MCContext &OutContext = OutStreamer->getContext();
 
     // Save information for later use.

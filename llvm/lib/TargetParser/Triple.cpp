@@ -16,6 +16,7 @@
 #include "llvm/TargetParser/ARMTargetParser.h"
 #include "llvm/TargetParser/ARMTargetParserCommon.h"
 #include "llvm/TargetParser/Host.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <cassert>
 #include <cstring>
 using namespace llvm;
@@ -800,7 +801,7 @@ static Triple::ObjectFormatType getDefaultFormat(const Triple &T) {
   case Triple::thumb:
   case Triple::x86:
   case Triple::x86_64:
-    if (T.isOSDarwin())
+    if (TripleUtils::isOSDarwin(T))
       return Triple::MachO;
     else if (T.isOSWindows())
       return Triple::COFF;
@@ -861,7 +862,7 @@ static Triple::ObjectFormatType getDefaultFormat(const Triple &T) {
     return Triple::ELF;
 
   case Triple::systemz:
-    if (T.isOSzOS())
+    if (TripleUtils::isOSzOS(T))
       return Triple::GOFF;
     return Triple::ELF;
 
@@ -1389,91 +1390,91 @@ void Triple::setOSAndEnvironmentName(StringRef Str) {
   setTriple(getArchName() + "-" + getVendorName() + "-" + Str);
 }
 
-static unsigned getArchPointerBitWidth(llvm::Triple::ArchType Arch) {
-  switch (Arch) {
-  case llvm::Triple::UnknownArch:
-    return 0;
+// static unsigned getArchPointerBitWidth(llvm::Triple::ArchType Arch) {
+//   switch (Arch) {
+//   case llvm::Triple::UnknownArch:
+//     return 0;
 
-  case llvm::Triple::avr:
-  case llvm::Triple::msp430:
-    return 16;
+//   case llvm::Triple::avr:
+//   case llvm::Triple::msp430:
+//     return 16;
 
-  case llvm::Triple::aarch64_32:
-  case llvm::Triple::amdil:
-  case llvm::Triple::arc:
-  case llvm::Triple::arm:
-  case llvm::Triple::armeb:
-  case llvm::Triple::csky:
-  case llvm::Triple::dxil:
-  case llvm::Triple::hexagon:
-  case llvm::Triple::hsail:
-  case llvm::Triple::kalimba:
-  case llvm::Triple::lanai:
-  case llvm::Triple::le32:
-  case llvm::Triple::loongarch32:
-  case llvm::Triple::m68k:
-  case llvm::Triple::mips:
-  case llvm::Triple::mipsel:
-  case llvm::Triple::nvptx:
-  case llvm::Triple::ppc:
-  case llvm::Triple::ppcle:
-  case llvm::Triple::r600:
-  case llvm::Triple::renderscript32:
-  case llvm::Triple::riscv32:
-  case llvm::Triple::shave:
-  case llvm::Triple::sparc:
-  case llvm::Triple::sparcel:
-  case llvm::Triple::spir:
-  case llvm::Triple::spirv32:
-  case llvm::Triple::tce:
-  case llvm::Triple::tcele:
-  case llvm::Triple::thumb:
-  case llvm::Triple::thumbeb:
-  case llvm::Triple::wasm32:
-  case llvm::Triple::x86:
-  case llvm::Triple::xcore:
-  case llvm::Triple::xtensa:
-    return 32;
+//   case llvm::Triple::aarch64_32:
+//   case llvm::Triple::amdil:
+//   case llvm::Triple::arc:
+//   case llvm::Triple::arm:
+//   case llvm::Triple::armeb:
+//   case llvm::Triple::csky:
+//   case llvm::Triple::dxil:
+//   case llvm::Triple::hexagon:
+//   case llvm::Triple::hsail:
+//   case llvm::Triple::kalimba:
+//   case llvm::Triple::lanai:
+//   case llvm::Triple::le32:
+//   case llvm::Triple::loongarch32:
+//   case llvm::Triple::m68k:
+//   case llvm::Triple::mips:
+//   case llvm::Triple::mipsel:
+//   case llvm::Triple::nvptx:
+//   case llvm::Triple::ppc:
+//   case llvm::Triple::ppcle:
+//   case llvm::Triple::r600:
+//   case llvm::Triple::renderscript32:
+//   case llvm::Triple::riscv32:
+//   case llvm::Triple::shave:
+//   case llvm::Triple::sparc:
+//   case llvm::Triple::sparcel:
+//   case llvm::Triple::spir:
+//   case llvm::Triple::spirv32:
+//   case llvm::Triple::tce:
+//   case llvm::Triple::tcele:
+//   case llvm::Triple::thumb:
+//   case llvm::Triple::thumbeb:
+//   case llvm::Triple::wasm32:
+//   case llvm::Triple::x86:
+//   case llvm::Triple::xcore:
+//   case llvm::Triple::xtensa:
+//     return 32;
 
-  case llvm::Triple::aarch64:
-  case llvm::Triple::aarch64_be:
-  case llvm::Triple::amdgcn:
-  case llvm::Triple::amdil64:
-  case llvm::Triple::bpfeb:
-  case llvm::Triple::bpfel:
-  case llvm::Triple::hsail64:
-  case llvm::Triple::le64:
-  case llvm::Triple::loongarch64:
-  case llvm::Triple::mips64:
-  case llvm::Triple::mips64el:
-  case llvm::Triple::nvptx64:
-  case llvm::Triple::ppc64:
-  case llvm::Triple::ppc64le:
-  case llvm::Triple::renderscript64:
-  case llvm::Triple::riscv64:
-  case llvm::Triple::sparcv9:
-  case llvm::Triple::spir64:
-  case llvm::Triple::spirv64:
-  case llvm::Triple::systemz:
-  case llvm::Triple::ve:
-  case llvm::Triple::wasm64:
-  case llvm::Triple::x86_64:
-    return 64;
-  }
-  llvm_unreachable("Invalid architecture value");
-}
+//   case llvm::Triple::aarch64:
+//   case llvm::Triple::aarch64_be:
+//   case llvm::Triple::amdgcn:
+//   case llvm::Triple::amdil64:
+//   case llvm::Triple::bpfeb:
+//   case llvm::Triple::bpfel:
+//   case llvm::Triple::hsail64:
+//   case llvm::Triple::le64:
+//   case llvm::Triple::loongarch64:
+//   case llvm::Triple::mips64:
+//   case llvm::Triple::mips64el:
+//   case llvm::Triple::nvptx64:
+//   case llvm::Triple::ppc64:
+//   case llvm::Triple::ppc64le:
+//   case llvm::Triple::renderscript64:
+//   case llvm::Triple::riscv64:
+//   case llvm::Triple::sparcv9:
+//   case llvm::Triple::spir64:
+//   case llvm::Triple::spirv64:
+//   case llvm::Triple::systemz:
+//   case llvm::Triple::ve:
+//   case llvm::Triple::wasm64:
+//   case llvm::Triple::x86_64:
+//     return 64;
+//   }
+//   llvm_unreachable("Invalid architecture value");
+// }
 
-bool Triple::isArch64Bit() const {
-  return getArchPointerBitWidth(getArch()) == 64;
-}
+// bool Triple::isArch64Bit() const {
+//   return getArchPointerBitWidth(getArch()) == 64;
+// }
 
-bool Triple::isArch32Bit() const {
-  return getArchPointerBitWidth(getArch()) == 32;
-}
+// bool Triple::isArch32Bit() const {
+//   return getArchPointerBitWidth(getArch()) == 32;
+// }
 
-bool Triple::isArch16Bit() const {
-  return getArchPointerBitWidth(getArch()) == 16;
-}
+// bool Triple::isArch16Bit() const {
+//   return getArchPointerBitWidth(getArch()) == 16;
+// }
 
 Triple Triple::get32BitArchVariant() const {
   Triple T(*this);
@@ -1816,32 +1817,6 @@ bool Triple::isCompatibleWith(const Triple &Other) const {
   return *this == Other;
 }
 
-std::string Triple::merge(const Triple &Other) const {
-  // If vendor is apple, pick the triple with the larger version number.
-  if (getVendor() == Triple::Apple)
-    if (Other.isOSVersionLT(*this))
-      return str();
-
-  return Other.str();
-}
-
-bool Triple::isMacOSXVersionLT(unsigned Major, unsigned Minor,
-                               unsigned Micro) const {
-  assert(isMacOSX() && "Not an OS X triple!");
-
-  // If this is OS X, expect a sane version number.
-  if (getOS() == Triple::MacOSX)
-    return isOSVersionLT(Major, Minor, Micro);
-
-  // Otherwise, compare to the "Darwin" number.
-  if (Major == 10) {
-    return isOSVersionLT(Minor + 4, Micro, 0);
-  } else {
-    assert(Major >= 11 && "Unexpected major version");
-    return isOSVersionLT(Major - 11 + 20, Minor, Micro);
-  }
-}
-
 VersionTuple Triple::getMinimumSupportedOSVersion() const {
   if (getVendor() != Triple::Apple || getArch() != Triple::aarch64)
     return VersionTuple();
@@ -1852,7 +1827,7 @@ VersionTuple Triple::getMinimumSupportedOSVersion() const {
   case Triple::IOS:
     // ARM64 slice is supported starting from Mac Catalyst 14 (macOS 11).
     // ARM64 simulators are supported for iOS 14+.
-    if (isMacCatalystEnvironment() || isSimulatorEnvironment())
+    if (TripleUtils::isMacCatalystEnvironment(*this) || TripleUtils::isSimulatorEnvironment(*this))
       return VersionTuple(14, 0, 0);
     // ARM64e slice is supported starting from iOS 14.
     if (isArm64e())
@@ -1860,12 +1835,12 @@ VersionTuple Triple::getMinimumSupportedOSVersion() const {
     break;
   case Triple::TvOS:
     // ARM64 simulators are supported for tvOS 14+.
-    if (isSimulatorEnvironment())
+    if (TripleUtils::isSimulatorEnvironment(*this))
       return VersionTuple(14, 0, 0);
     break;
   case Triple::WatchOS:
     // ARM64 simulators are supported for watchOS 7+.
-    if (isSimulatorEnvironment())
+    if (TripleUtils::isSimulatorEnvironment(*this))
       return VersionTuple(7, 0, 0);
     break;
   case Triple::DriverKit:

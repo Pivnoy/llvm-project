@@ -297,7 +297,7 @@ fatbinary(ArrayRef<std::pair<StringRef, StringRef>> InputFiles,
 
   SmallVector<StringRef, 16> CmdArgs;
   CmdArgs.push_back(*FatBinaryPath);
-  CmdArgs.push_back(Triple.isArch64Bit() ? "-64" : "-32");
+  CmdArgs.push_back(TripleUtils::isArch64Bit(Triple) ? "-64" : "-32");
   CmdArgs.push_back("--create");
   CmdArgs.push_back(*TempFileOrErr);
   for (const auto &[File, Arch] : InputFiles)

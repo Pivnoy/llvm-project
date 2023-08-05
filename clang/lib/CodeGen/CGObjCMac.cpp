@@ -3231,8 +3231,8 @@ llvm::Constant *CGObjCCommonMac::EmitPropertyList(Twine Name,
     // Make this entry NULL for OS X with deployment target < 10.11, for iOS
     // with deployment target < 9.0.
     const llvm::Triple &Triple = CGM.getTarget().getTriple();
-    if ((Triple.isMacOSX() && Triple.isMacOSXVersionLT(10, 11)) ||
-        (Triple.isiOS() && Triple.isOSVersionLT(9)))
+    if ((llvm::TripleUtils::isMacOSX(Triple) && llvm::TripleUtils::isMacOSXVersionLT(Triple, 10, 11)) ||
+        (llvm::TripleUtils::isiOS(Triple) && llvm::TripleUtils::isOSVersionLT(Triple, 9)))
       return llvm::Constant::getNullValue(ObjCTypes.PropertyListPtrTy);
   }
 
@@ -6487,7 +6487,7 @@ void CGObjCNonFragileABIMac::GenerateClass(const ObjCImplementationDecl *ID) {
 
     // Only OS X with deployment version <10.9 use the empty vtable symbol
     const llvm::Triple &Triple = CGM.getTarget().getTriple();
-    if (Triple.isMacOSX() && Triple.isMacOSXVersionLT(10, 9))
+    if (llvm::TripleUtils::isMacOSX(Triple) && llvm::TripleUtils::isMacOSXVersionLT(Triple, 10, 9))
       ObjCEmptyVtableVar =
           new llvm::GlobalVariable(CGM.getModule(), ObjCTypes.ImpnfABITy, false,
                                    llvm::GlobalValue::ExternalLinkage, nullptr,

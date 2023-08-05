@@ -29,6 +29,7 @@
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 using namespace llvm;
 
@@ -341,7 +342,7 @@ static MCAsmInfo *createARMMCAsmInfo(const MCRegisterInfo &MRI,
                                      const Triple &TheTriple,
                                      const MCTargetOptions &Options) {
   MCAsmInfo *MAI;
-  if (TheTriple.isOSDarwin() || TheTriple.isOSBinFormatMachO())
+  if (TripleUtils::isOSDarwin(TheTriple) || TheTriple.isOSBinFormatMachO())
     MAI = new ARMMCAsmInfoDarwin(TheTriple);
   else if (TheTriple.isWindowsMSVCEnvironment())
     MAI = new ARMCOFFMCAsmInfoMicrosoft();

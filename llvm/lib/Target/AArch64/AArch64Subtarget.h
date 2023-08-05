@@ -272,8 +272,8 @@ public:
 
   bool isLittleEndian() const { return IsLittle; }
 
-  bool isTargetDarwin() const { return TargetTriple.isOSDarwin(); }
-  bool isTargetIOS() const { return TargetTriple.isiOS(); }
+  bool isTargetDarwin() const { return TripleUtils::isOSDarwin(TargetTriple); }
+  bool isTargetIOS() const { return TripleUtils::isiOS(TargetTriple); }
   bool isTargetLinux() const { return TargetTriple.isOSLinux(); }
   bool isTargetWindows() const { return TargetTriple.isOSWindows(); }
   bool isTargetAndroid() const { return TargetTriple.isAndroid(); }
@@ -285,7 +285,7 @@ public:
   bool isTargetMachO() const { return TargetTriple.isOSBinFormatMachO(); }
 
   bool isTargetILP32() const {
-    return TargetTriple.isArch32Bit() ||
+    return TripleUtils::isArch32Bit(TargetTriple) ||
            TargetTriple.getEnvironment() == Triple::GNUILP32;
   }
 

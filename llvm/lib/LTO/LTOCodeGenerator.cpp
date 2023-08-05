@@ -57,6 +57,7 @@
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/TargetParser/Host.h"
 #include "llvm/TargetParser/SubtargetFeature.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/IPO/Internalize.h"
 #include "llvm/Transforms/IPO/WholeProgramDevirt.h"
@@ -269,7 +270,7 @@ bool LTOCodeGenerator::runAIXSystemAssembler(SmallString<128> &AssemblyFile) {
 
   // Prepare inputs for the assember.
   const auto &Triple = TargetMach->getTargetTriple();
-  const char *Arch = Triple.isArch64Bit() ? "-a64" : "-a32";
+  const char *Arch = TripleUtils::isArch64Bit(Triple) ? "-a64" : "-a32";
   std::string ObjectFileName(AssemblyFile);
   ObjectFileName[ObjectFileName.size() - 1] = 'o';
   SmallVector<StringRef, 8> Args = {
@@ -409,7 +410,7 @@ bool LTOCodeGenerator::determineTarget() {
   Features.getDefaultSubtargetFeatures(Triple);
   FeatureStr = Features.getString();
   // Set a default CPU for Darwin triples.
-  if (Config.CPU.empty() && Triple.isOSDarwin()) {
+  if (Config.CPU.empty() && TripleUtils::isOSDarwin(Triple)) {
     if (Triple.getArch() == llvm::Triple::x86_64)
       Config.CPU = "core2";
     else if (Triple.getArch() == llvm::Triple::x86)

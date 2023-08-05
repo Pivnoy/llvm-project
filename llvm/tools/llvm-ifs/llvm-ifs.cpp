@@ -30,6 +30,7 @@
 #include "llvm/Support/YAMLTraits.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include "llvm/TextAPI/InterfaceFile.h"
 #include "llvm/TextAPI/TextAPIReader.h"
 #include "llvm/TextAPI/TextAPIWriter.h"
@@ -194,15 +195,15 @@ static int writeTbdStub(const Triple &T, const std::vector<IFSSymbol> &Symbols,
 
   auto PlatformTypeOrError =
       [](const llvm::Triple &T) -> llvm::Expected<llvm::MachO::PlatformType> {
-    if (T.isMacOSX())
+    if (llvm::TripleUtils::isMacOSX(T))
       return llvm::MachO::PLATFORM_MACOS;
-    if (T.isTvOS())
+    if (llvm::TripleUtils::isTvOS(T))
       return llvm::MachO::PLATFORM_TVOS;
-    if (T.isWatchOS())
+    if (llvm::TripleUtils::isWatchOS(T))
       return llvm::MachO::PLATFORM_WATCHOS;
     // Note: put isiOS last because tvOS and watchOS are also iOS according
     // to the Triple.
-    if (T.isiOS())
+    if (llvm::TripleUtils::isiOS(T))
       return llvm::MachO::PLATFORM_IOS;
 
     return createStringError(errc::not_supported, "Invalid Platform.\n");

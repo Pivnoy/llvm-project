@@ -62,6 +62,7 @@
 #include "llvm/Support/KnownBits.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Target/TargetOptions.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <algorithm>
 #include <bitset>
 #include <cctype>
@@ -3051,7 +3052,7 @@ unsigned X86TargetLowering::getAddressSpace() const {
 
 static bool hasStackGuardSlotTLS(const Triple &TargetTriple) {
   return TargetTriple.isOSGlibc() || TargetTriple.isOSFuchsia() ||
-         (TargetTriple.isAndroid() && !TargetTriple.isAndroidVersionLT(17));
+         (TargetTriple.isAndroid() && !TripleUtils::isAndroidVersionLT(TargetTriple, 17));
 }
 
 static Constant* SegmentOffset(IRBuilderBase &IRB,
@@ -3506,7 +3507,7 @@ EVT X86TargetLowering::getTypeForExtReturn(LLVMContext &Context, EVT VT,
                                            ISD::NodeType ExtendKind) const {
   MVT ReturnMVT = MVT::i32;
 
-  bool Darwin = Subtarget.getTargetTriple().isOSDarwin();
+  bool Darwin = TripleUtils::isOSDarwin(Subtarget.getTargetTriple());
   if (VT == MVT::i1 || (!Darwin && (VT == MVT::i8 || VT == MVT::i16))) {
     // The ABI does not require i1, i8 or i16 to be extended.
     //
@@ -23883,7 +23884,7 @@ SDValue X86TargetLowering::LowerFP_EXTEND(SDValue Op, SelectionDAG &DAG) const {
   // Let f16->f80 get lowered to a libcall, except for darwin, where we should
   // lower it to an fp_extend via f32 (as only f16<>f32 libcalls are available)
   if (VT == MVT::f128 || (SVT == MVT::f16 && VT == MVT::f80 &&
-                          !Subtarget.getTargetTriple().isOSDarwin()))
+                          !TripleUtils::isOSDarwin(Subtarget.getTargetTriple())))
     return SDValue();
 
   if (SVT == MVT::f16) {
@@ -23902,7 +23903,7 @@ SDValue X86TargetLowering::LowerFP_EXTEND(SDValue Op, SelectionDAG &DAG) const {
     }
 
     if (!Subtarget.hasF16C()) {
-      if (!Subtarget.getTargetTriple().isOSDarwin())
+      if (!TripleUtils::isOSDarwin(Subtarget.getTargetTriple()))
         return SDValue();
 
       assert(VT == MVT::f32 && SVT == MVT::f16 && "unexpected extend libcall");
@@ -23997,7 +23998,7 @@ SDValue X86TargetLowering::LowerFP_ROUND(SDValue Op, SelectionDAG &DAG) const {
 
   if (VT == MVT::f16 && (SVT == MVT::f64 || SVT == MVT::f32) &&
       !Subtarget.hasFP16() && (SVT == MVT::f64 || !Subtarget.hasF16C())) {
-    if (!Subtarget.getTargetTriple().isOSDarwin())
+    if (!TripleUtils::isOSDarwin(Subtarget.getTargetTriple()))
       return SDValue();
 
     // We need a libcall but the ABI for f16 libcalls on MacOS is soft.

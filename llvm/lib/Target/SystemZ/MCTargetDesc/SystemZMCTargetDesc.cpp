@@ -19,6 +19,7 @@
 #include "llvm/MC/MCStreamer.h"
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/MC/TargetRegistry.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 using namespace llvm;
 
@@ -153,7 +154,7 @@ unsigned SystemZMC::getFirstReg(unsigned Reg) {
 static MCAsmInfo *createSystemZMCAsmInfo(const MCRegisterInfo &MRI,
                                          const Triple &TT,
                                          const MCTargetOptions &Options) {
-  if (TT.isOSzOS())
+  if (TripleUtils::isOSzOS(TT))
     return new SystemZMCAsmInfoGOFF(TT);
 
   MCAsmInfo *MAI = new SystemZMCAsmInfoELF(TT);

@@ -84,24 +84,24 @@ public:
     // combinations.
     this->TLSSupported = false;
 
-    if (Triple.isMacOSX())
-      this->TLSSupported = !Triple.isMacOSXVersionLT(10, 7);
-    else if (Triple.isiOS()) {
+    if (llvm::TripleUtils::isMacOSX(Triple))
+      this->TLSSupported = !llvm::TripleUtils::isMacOSXVersionLT(Triple, 10, 7);
+    else if (llvm::TripleUtils::isiOS(Triple)) {
       // 64-bit iOS supported it from 8 onwards, 32-bit device from 9 onwards,
       // 32-bit simulator from 10 onwards.
-      if (Triple.isArch64Bit())
+      if (llvm::TripleUtils::isArch64Bit(Triple))
         this->TLSSupported = !Triple.isOSVersionLT(8);
-      else if (Triple.isArch32Bit()) {
+      else if (llvm::TripleUtils::isArch32Bit(Triple)) {
         if (!Triple.isSimulatorEnvironment())
-          this->TLSSupported = !Triple.isOSVersionLT(9);
+          this->TLSSupported = !llvm::TripleUtils::isOSVersionLT(Triple, 9);
         else
-          this->TLSSupported = !Triple.isOSVersionLT(10);
+          this->TLSSupported = !llvm::TripleUtils::isOSVersionLT(Triple, 10);
       }
     } else if (Triple.isWatchOS()) {
       if (!Triple.isSimulatorEnvironment())
-        this->TLSSupported = !Triple.isOSVersionLT(2);
+        this->TLSSupported = !llvm::TripleUtils::isOSVersionLT(Triple, 2);
       else
-        this->TLSSupported = !Triple.isOSVersionLT(3);
+        this->TLSSupported = !llvm::TripleUtils::isOSVersionLT(Triple, 3);
     } else if (Triple.isDriverKit()) {
       // No TLS on DriverKit.
     }

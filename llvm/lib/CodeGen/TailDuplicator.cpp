@@ -38,6 +38,7 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <algorithm>
 #include <cassert>
 #include <iterator>
@@ -611,7 +612,7 @@ bool TailDuplicator::shouldTailDuplicate(bool IsSimple,
     // DWARF, allow them be duplicated, so that their existence doesn't prevent
     // tail duplication of some basic blocks, that would be duplicated otherwise.
     if (MI.isNotDuplicable() &&
-        (TailBB.getParent()->getTarget().getTargetTriple().isOSDarwin() ||
+        (TripleUtils::isOSDarwin(TailBB.getParent()->getTarget().getTargetTriple()) ||
         !MI.isCFIInstruction()))
       return false;
 

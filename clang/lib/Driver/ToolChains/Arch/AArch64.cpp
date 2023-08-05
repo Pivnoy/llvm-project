@@ -23,7 +23,7 @@ using namespace llvm::opt;
 /// \returns true if the given triple can determine the default CPU type even
 /// if -arch is not specified.
 static bool isCPUDeterminedByTriple(const llvm::Triple &Triple) {
-  return Triple.isOSDarwin();
+  return llvm::TripleUtils::isOSDarwin(TC.getTriple());
 }
 
 /// getAArch64TargetCPU - Get the (LLVM) name of the AArch64 cpu we are
@@ -59,7 +59,7 @@ std::string aarch64::getAArch64TargetCPU(const ArgList &Args,
 
   // Make sure we pick the appropriate Apple CPU if -arch is used or when
   // targetting a Darwin OS.
-  if (Args.getLastArg(options::OPT_arch) || Triple.isOSDarwin())
+  if (Args.getLastArg(options::OPT_arch) || llvm::TripleUtils::isOSDarwin(Triple))
     return Triple.getArch() == llvm::Triple::aarch64_32 ? "apple-s4"
                                                         : "apple-a7";
 

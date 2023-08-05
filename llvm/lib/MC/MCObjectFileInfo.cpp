@@ -24,12 +24,13 @@
 #include "llvm/MC/MCSectionXCOFF.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 using namespace llvm;
 
 static bool useCompactUnwind(const Triple &T) {
   // Only on darwin.
-  if (!T.isOSDarwin())
+  if (!TripleUtils::isOSDarwin(T))
     return false;
 
   // aarch64 always has it.
@@ -37,19 +38,19 @@ static bool useCompactUnwind(const Triple &T) {
     return true;
 
   // armv7k always has it.
-  if (T.isWatchABI())
+  if (TripleUtils::isWatchABI(T))
     return true;
 
   // Use it on newer version of OS X.
-  if (T.isMacOSX() && !T.isMacOSXVersionLT(10, 6))
+  if (TripleUtils::isMacOSX(T) && !TripleUtils::isMacOSXVersionLT(T, 10, 6))
     return true;
 
   // And the iOS simulator.
-  if (T.isiOS() && T.isX86())
+  if (TripleUtils::isiOS(T) && T.isX86())
     return true;
 
   // The rest of the simulators always have it.
-  if (T.isSimulatorEnvironment())
+  if (TripleUtils::isSimulatorEnvironment(T))
     return true;
 
   return false;
@@ -65,9 +66,9 @@ void MCObjectFileInfo::initMachOMCObjectFileInfo(const Triple &T) {
           MachO::S_ATTR_STRIP_STATIC_SYMS | MachO::S_ATTR_LIVE_SUPPORT,
       SectionKind::getReadOnly());
 
-  if (T.isOSDarwin() &&
+  if (TripleUtils::isOSDarwin(T) &&
       (T.getArch() == Triple::aarch64 || T.getArch() == Triple::aarch64_32 ||
-      T.isSimulatorEnvironment()))
+      TripleUtils::isSimulatorEnvironment(T)))
     SupportsCompactUnwindWithoutEHFrame = true;
 
   switch (Ctx->emitDwarfUnwindInfo()) {
@@ -79,7 +80,7 @@ void MCObjectFileInfo::initMachOMCObjectFileInfo(const Triple &T) {
     break;
   case EmitDwarfUnwindType::Default:
     OmitDwarfIfHaveCompactUnwind =
-        T.isWatchABI() || SupportsCompactUnwindWithoutEHFrame;
+        TripleUtils::isWatchABI(T) || SupportsCompactUnwindWithoutEHFrame;
     break;
   }
 

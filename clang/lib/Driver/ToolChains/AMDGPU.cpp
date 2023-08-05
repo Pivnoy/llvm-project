@@ -663,7 +663,7 @@ AMDGPUToolChain::TranslateArgs(const DerivedArgList &Args, StringRef BoundArch,
 
   // Phase 1 (.cl -> .bc)
   if (Args.hasArg(options::OPT_c) && Args.hasArg(options::OPT_emit_llvm)) {
-    DAL->AddFlagArg(nullptr, Opts.getOption(getTriple().isArch64Bit()
+    DAL->AddFlagArg(nullptr, Opts.getOption(llvm::TripleUtils::isArch64Bit(getTriple())
                                                 ? options::OPT_m64
                                                 : options::OPT_m32));
 

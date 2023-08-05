@@ -26,6 +26,7 @@
 #include "llvm/Support/VersionTuple.h"
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/TargetParser/TripleUtils.h"
 #include <cassert>
 #include <climits>
 #include <memory>

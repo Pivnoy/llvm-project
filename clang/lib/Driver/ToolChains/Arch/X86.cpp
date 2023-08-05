@@ -15,6 +15,7 @@
 #include "llvm/ADT/StringMap.h"
 #include "llvm/Option/ArgList.h"
 #include "llvm/TargetParser/Host.h"
+#include "llvm/TargetParser/TripleUtils.h"
 
 using namespace clang::driver;
 using namespace clang::driver::tools;
@@ -73,12 +74,12 @@ std::string x86::getX86TargetCPU(const Driver &D, const ArgList &Args,
   bool Is64Bit = Triple.getArch() == llvm::Triple::x86_64;
 
   // FIXME: Need target hooks.
-  if (Triple.isOSDarwin()) {
+  if (llvm::TripleUtils::isOSDarwin(Triple)) {
     if (Triple.getArchName() == "x86_64h")
       return "core-avx2";
     // macosx10.12 drops support for all pre-Penryn Macs.
     // Simulators can still run on 10.11 though, like Xcode.
-    if (Triple.isMacOSX() && !Triple.isOSVersionLT(10, 12))
+    if (llvm::TripleUtils::isMacOSX(Triple) && !llvm::TripleUtils::isOSVersionLT(Triple, 10, 12))
       return "penryn";
 
     if (Triple.isDriverKit())
